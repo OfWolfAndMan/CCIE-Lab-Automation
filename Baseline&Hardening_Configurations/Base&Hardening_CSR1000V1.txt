@@ -39,7 +39,7 @@ ip ssh source GigabitEthernet2
 ip ssh version 2
 ip scp server enable
 
-platform serial console
+platform console serial
 
 ip radius source-interface GigabitEthernet2
 no ip http server
@@ -94,7 +94,7 @@ alias exec sr show run
 alias exec siib show ip int brief
 alias exec scn show cdp neighbo
 
-banner login ^C
+banner login ^CC
 ******************************  WARNING  ***************************
 | This system is restricted solely to [entity] authorized personnel |
 | for legitimate business purposes only. The actual or attempted   |
