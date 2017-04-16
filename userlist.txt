@@ -1,0 +1,6 @@
+localusername
+localpassword
+radiususername
+radiuspassword
+scpusername
+scppassword
