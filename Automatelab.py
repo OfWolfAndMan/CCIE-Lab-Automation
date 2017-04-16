@@ -1,3 +1,9 @@
+'''
+Modified April 16, 2017
+
+@author: OfWolfAndMan
+'''
+
 import sys
 import os
 import platform
@@ -365,23 +371,7 @@ def telnet_attempt():
 		print "[!] Serial over telnet attempt failed for device %s." % DeviceName
 		unsuccessful_connections.append(DeviceName)
 
-
-def hardening_to_running(device):
-	print "[+] Copying baseline/hardening scripts to running config."
-	print "\n[+] Progress\n"
-	pbar = tqdm(total=100)
-	for DeviceName in Devices:
-		device_ip = Devices[DeviceName][0]
-		try:
-			net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
-			output = net_connect.send_command("copy bootflash:Base&Hardening_Generic\n\n running-config")
-			net_connect.disconnect()
-		except netmiko.ssh_exception.NetMikoTimeoutException:
-			pass
-		pbar.update(100/len(Devices))
-	print "[+] Copying of baseline and hardening configurations to running config completed.\n"
-	pbar.close()
-def rollback_to_basehardening():
+def reinitialize_basehardening():
 	device = 'cisco_ios'
 	while True:
 		localorradius = raw_input("[?] Are you currently using RADIUS or local credentials? [local/radius]\n")
@@ -580,7 +570,7 @@ def main_menu_selection():
 		elif selection == '3':
 			choose_scenario_type()
 			print "[+] Applying templates..."
-			rollback_to_basehardening()
+			reinitialize_basehardening()
 		elif selection == '4':
 			device = 'cisco_ios'
 			pbar = tqdm(total=100)
