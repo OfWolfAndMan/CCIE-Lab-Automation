@@ -1,0 +1,120 @@
+!
+version 15.4
+!
+enable
+!
+configure terminal
+!
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service password-encryption
+
+no logging console
+!
+aaa new-model
+!
+aaa authentication attempts login 4
+aaa authentication login default group radius local
+aaa authentication enable default group tacacs+ enable
+aaa authorization exec default group radius local
+aaa accounting exec default start-stop group radius
+
+ip domain-lookup
+ip name-server [name server 1]
+ip name-server [name server 2]
+
+ip tcp synwait-time 10
+ip ssh time-out 60
+ip ssh authentication-retries 3
+ip ssh source GigabitEthernet2
+ip ssh version 2
+ip scp server enable
+
+ip radius source-interface GigabitEthernet2
+no ip http server
+no ip http secure-server
+
+interface GigabitEthernet1
+no ip proxy-arp
+no ip unreachables
+no ip redirects
+no shutdown
+
+interface range Gig2-3
+no ip proxy-arp
+no ip unreachables
+no ip redirects
+no snmp trap link-status
+
+interface GigabitEthernet1
+description <===Virtual Network Connection===>
+
+interface GigabitEthernet2
+description <===Connection to Lab Full Mesh===>
+
+interface GigabitEthernet3
+description <===UNUSED===>
+
+ip access-list standard SSH_ACCESS
+ remark JumpBox_VM Access
+ permit 10.100.100.100 log
+ remark Rpi3 Access
+ permit [ip address] log
+ remark Trusted_Users Access
+ permit 192.168.100.0 0.0.0.255 log
+ permit 172.17.51.0 0.0.0.255 log
+
+kron policy-list Daily_Backup
+ cli write memory
+ 
+kron occurrence Daily_Backup at 16:30 recurring
+ policy-list Daily-Backup
+ 
+radius server PI
+ address ipv4 [ip address] auth-port 1812 acct-port 1813
+ key 7 [RADIUS key]
+
+alias exec sr show run
+alias exec siib show ip int brief
+alias exec scn show cdp neighbo
+
+banner login ^C
+******************************  WARNING  ***************************
+| This system is restricted solely to [entity] authorized personnel |
+| for legitimate business purposes only. The actual or attempted   |
+| unauthorized access, use or modification of this systems strictly|
+| prohibited.  Unauthorized personnel are subject to [entity]'s     |
+| disciplinary proceedings and/or criminal/civil penalties under   |
+| state, federal or other applicable domestic/foreign laws. The    |
+| use of this system is monitored and recorded for administrative  |
+| and security reasons. Anyone accessing this system expressly     |
+| consents to such monitoring and is advised that if such          |
+| monitoring reveals possible evidence of criminal activity,       |
+| [entity] may provide the evidence of such activity to law         |
+| enforcement officials.                                           |
+********************************************************************
+^C
+
+
+line con 0
+ exec-timeout 5 0
+ privilege level 15
+line aux 0
+ no exec
+ transport input none
+line vty 0 4
+access-class SSH_ACCESS in
+exec-timeout 10
+privilege level 15
+line vty 5 15
+ no exec
+ transport input none
+
+ntp source G2
+ntp server [ntpsvr 1] 
+ntp server [ntpsvr 2] 
+
+end
+
+write memory
