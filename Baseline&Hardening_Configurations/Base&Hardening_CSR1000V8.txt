@@ -17,7 +17,7 @@ aaa new-model
 !
 aaa authentication attempts login 4
 aaa authentication login default group radius local
-aaa authentication enable default group tacacs+ enable
+aaa authentication enable default group radius enable
 aaa authorization exec default group radius local
 aaa accounting exec default start-stop group radius
 
