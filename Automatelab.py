@@ -18,6 +18,12 @@ import netmiko
 from netmiko import ConnectHandler
 from tqdm import tqdm
 
+
+'''
+The two IPs is for CSRs under a VMWare hypervisor. One is the virtual serial 
+IP, and the other is the SSH IP. If the device is not configured, the serial 
+IP will be needed to remote and push initial commands to.
+'''
 Devices = {'SW4': ['192.168.10.105'], 'CSR1000V1': ['10.51.60.36', '192.168.10.120', '2001'],
 		   'CSR1000V2': ['10.51.60.37', '192.168.10.120', '2002'], 'CSR1000V3': ['10.51.60.38', '192.168.10.120', '2003'],
 		   'CSR1000V4': ['10.51.60.39', '192.168.10.120', '2004'], 'CSR1000V5': ['10.51.60.40', '192.168.10.120', '2005'],
@@ -52,12 +58,17 @@ def call_variables():
 	scppass = variables[5]
 	scpip = variables[6]
 
-"""Currently, this script is written for Cisco IOS. In the future, variants
-may be written for other vendors' equipment."""
+'''
+Currently, this script is written for Cisco IOS. In the future, variants
+may be written for other vendors' equipment.
+'''
 
-"""Default="yes" in the function below represents a default 
+'''
+Default="yes" in the function below represents a default 
 option. If the option is not specified otherwise, it resorts
-to the default of "yes"."""
+to the default of "yes".
+'''
+
 def query_yes_no(question, default="y"):
 	"""Ask a yes/no question via raw_input() and return their answer.
 
@@ -89,6 +100,10 @@ def query_yes_no(question, default="y"):
 			sys.stdout.write("Please respond with 'y' or 'n' \n")
 
 def install_premium_license(device_ip, device, DeviceName):
+	'''
+	Enables a premium license on a CSR1000V IF it is not enabled
+	already. NOTE: This does not work after CSR image version 3.12
+	'''
 	print """
 			!#***************************************************************!#
 			!# It is advised to take a snapshot after installing the premium !#
@@ -151,6 +166,7 @@ def create_threads(domainname, localuser, localpass):
 
 
 def default_configurations():
+	'''Wipe device configurations.'''
 	device = 'cisco_ios'
 	print "[+] Initiating startup configuration wipe of all applicable devices\n"
 	for DeviceName in Devices:
@@ -167,7 +183,10 @@ def default_configurations():
 		except:
 			pass
 
-def ip_reachability_group():		
+def ip_reachability_group():	
+	'''
+	Verifies IP reachability before proceeding with a task.
+	'''	
 	print "\n[+] Checking IP reachability. Please wait...\n"
 	pingable_devices = {}
 	global unpingable_devices
@@ -216,6 +235,9 @@ def ip_reachability_group():
 			print "{+}", DeviceName,"- ", Devices[DeviceName][0]
 
 def get_bgp_asn():
+	'''
+	Pulls BGP ASN numbers from all routers. Returns 'N/A' if none.
+	'''
 	device = 'cisco_ios'
 	for DeviceName in Devices:
 		if "CSR1000V" in DeviceName:
@@ -233,6 +255,10 @@ def get_bgp_asn():
 	print "Done"
 
 def backup_config():
+	'''
+	Backs up all device configs in the specified dictionary.
+	A Raspberry Pi was used as a test backup location in development.
+	'''
 	global unsuccessful_connections
 	unsuccessful_connections = []
 	global successful_connections
@@ -310,8 +336,10 @@ def telnet_initial(domainname, localusername, localpassword, DeviceName):
 		time.sleep(1)
 		connection.write("enable secret %s\r\n" % localpassword)
 		connection.write("ip route 0.0.0.0 0.0.0.0 10.51.60.33 2\n")
-		#The reason there is an AD of 2 for the default route is due to having them in 
-		#the lab scenarios sometimes.
+		'''
+		The reason there is an AD of 2 for the default route is due to having them in 
+		the lab scenarios sometimes.
+		'''
 		connection.write("username %s privilege 15 secret %s\r\n" % (localusername, localpassword) )
 		connection.write("line vty 0 4\r\n")
 		connection.write("login local\r\n")
@@ -376,6 +404,10 @@ def telnet_attempt():
 		unsuccessful_connections.append(DeviceName)
 
 def reinitialize_basehardening():
+	'''
+	Reloads specific configuration without reloading or appending
+	startup-config to the running-config.
+	'''
 	device = 'cisco_ios'
 	while True:
 		localorradius = raw_input("[?] Are you currently using RADIUS or local credentials? [local/radius]\n")
@@ -436,6 +468,10 @@ def reinitialize_basehardening():
 		print "[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n"
 		pbar.close()
 def choose_scenario_type():
+	'''
+	Segmentation logic used to identify device type and include
+	only subsets of devices.
+	'''
 	while True:
 		RandS = raw_input('[?] Are these configurations for a switching lab, a routing lab, or both? Choose one of the three options: [sw/rt/both]')
 		if RandS == 'rt':
@@ -473,9 +509,7 @@ def scenario_configuration():
 	print "[+] Which Baseline Configs would you like to implement?\n"
 	dir_output = []
 	for dir in enumerate(os.listdir('.'), start = 1):
-		#print "[+] %d %s" % (ij, dir)
 		dir_output.append(dir)
-		#dir_output[ij] = dir
 	#Using the below, I was able to print the options in three columns
 	for a,b,c in zip(dir_output[::3],dir_output[1::3],dir_output[2::3]):
 		print '{:<50}{:<43}{:<}'.format(a,b,c)
