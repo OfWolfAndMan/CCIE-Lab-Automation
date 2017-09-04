@@ -1,7 +1,7 @@
 '''
-Modified April 16, 2017
+Modified September 4, 2017
 
-Version: 1.17
+Version: 1.2
 
 @author: OfWolfAndMan
 '''
@@ -106,7 +106,7 @@ def install_premium_license(device_ip, device, DeviceName):
 		pass
 	except EOFError:
 		pass
-	pbar.update(100/len(Devices))
+	pbar.update(100/float(len(Devices)))
 
 def backup_config_single(device_ip, device, DeviceName):
 	try:
@@ -194,7 +194,7 @@ def ip_reachability_group():
 				unpingable_devices[DeviceName] = device_ip
 			else:
 				unpingable_devices[DeviceName] = device_ip
-			pbar.update(100/len(Devices))
+			pbar.update(100/float(len(Devices)))
 		pbar.close()
 	print "[+]The following devices were reachable:\n"
 	for reach in pingable_devices:
@@ -417,7 +417,7 @@ def reinitialize_basehardening():
 				net_connect.disconnect()
 			except netmiko.ssh_exception.NetMikoTimeoutException:
 				pass
-			pbar.update(100/len(Devices))
+			pbar.update(100/float(len(Devices)))
 		print "[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n"
 		pbar.close()
 	else:
