@@ -1,5 +1,5 @@
 # CCIE-Lab-Automation
-# Version 1.17
+## Version 1.17
 
 Use this script to automate a CSR1000V deployment, primarily within a CCIE lab environment.
 
@@ -51,7 +51,7 @@ Built in python 2.7. The following are a few features currently available with t
 	
 **Caveats:**
 
-	Baseline script formatting must have the following requirements for configure replace to take it properly:
+Baseline script formatting must have the following requirements for configure replace to take it properly:
 	
 	- "Version 15.4" (Or the applicable version)
 	
@@ -60,7 +60,7 @@ Built in python 2.7. The following are a few features currently available with t
 	- Subcommands, such as those under "interface Gigx/x", must have a space in them to display hierarchy. Otherwise those lines
 	won't be added.
 
-	Paths should be defined in the script to suit your needs. Things that may need to be changed in the script includes:
+Paths should be defined in the script to suit your needs. Things that may need to be changed in the script includes:
 	
 	-SCP server IP
 	
