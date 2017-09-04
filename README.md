@@ -33,32 +33,32 @@ Built in python 2.7. The following are a few features currently available with t
 
 **New in this release:**
 
-[+] TQDM progress bar features
+- TQDM progress bar features
 	
-[+] Eliminate need to reload after completion of configuration by introducing the "configure replace" option
+- Eliminate need to reload after completion of configuration by introducing the "configure replace" option
 	
-[+] Improved decision logic
+- Improved decision logic
 	
-[+] Usernames/passwords for local, TACACS+/RADIUS, and SCP logins have been moved to a separate file to allow more flexibility.
+- Usernames/passwords for local, TACACS+/RADIUS, and SCP logins have been moved to a separate file to allow more flexibility.
 
 **(Potential) Future Development:**
 
-[+] TextFSM integration for data parsing
+- TextFSM integration for data parsing
 
-[+] Ansible integration for supplementary configuration management purposes
+- Ansible integration for supplementary configuration management purposes
 
-[+] Jinja2 integration for ease of configuration templating
+- Jinja2 integration for ease of configuration templating
 	
 **Caveats:**
 
 Baseline script formatting must have the following requirements for configure replace to take it properly:
 	
-	- "Version 15.4" (Or the applicable version)
+- "Version 15.4" (Or the applicable version)
 	
-	- "end" command
+- "end" command
 	
-	- Subcommands, such as those under "interface Gigx/x", must have a space in them to display hierarchy. Otherwise those lines
-	won't be added.
+- Subcommands, such as those under "interface Gigx/x", must have a space in them to display hierarchy. Otherwise those lines
+won't be added.
 
 Paths should be defined in the script to suit your needs. Things that may need to be changed in the script includes:
 	
