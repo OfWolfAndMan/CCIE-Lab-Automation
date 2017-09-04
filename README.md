@@ -1,5 +1,5 @@
 # CCIE-Lab-Automation
-## Version 1.17
+## Version 1.2
 
 Use this script to automate a CSR1000V deployment, primarily within a CCIE lab environment.
 
