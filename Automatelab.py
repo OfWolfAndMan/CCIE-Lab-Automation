@@ -26,29 +26,31 @@ Devices = {'SW4': ['192.168.10.105'], 'CSR1000V1': ['10.51.60.36', '192.168.10.1
 		   'CSR1000V10': ['10.51.60.45', '192.168.10.120', '2010'], 'SW1': ['192.168.10.102'],
 		   'SW2': ['192.168.10.103'], 'SW3': ['192.168.10.104']
 		   }
-		   
-path = '/root/scripts/CCIE_Automation/'
-os.chdir(path)
-		   
-variables = []
-variable_file_one = open('userlist.txt', 'r')
-variable_file_one.seek(0)
-for eachline in variable_file_one.readlines():
-	variables.append(eachline.rstrip())
-variable_file_one.close()
-variable_file_two = open('netserver.txt', 'r')
-variable_file_two.seek(0)
-for eachline in variable_file_two.readlines():
-	variables.append(eachline.rstrip())
-variable_file_two.close()
-		   
-localusername = variables[0]
-localpassword = variables[1]
-radiususer = variables[2]
-radiuspass = variables[3]
-scpuser = variables[4]
-scppass = variables[5]
-scpip = variables[6]
+
+def call_variables():		   
+	path = '/root/scripts/CCIE_Automation/'
+	os.chdir(path)
+
+	global localusername, localpassword, radiususer, radiuspass, scpuser, scppass, scpip
+	variables = []
+	variable_file_one = open('userlist.txt', 'r')
+	variable_file_one.seek(0)
+	for eachline in variable_file_one.readlines():
+		variables.append(eachline.rstrip())
+	variable_file_one.close()
+	variable_file_two = open('netserver.txt', 'r')
+	variable_file_two.seek(0)
+	for eachline in variable_file_two.readlines():
+		variables.append(eachline.rstrip())
+	variable_file_two.close()
+			   
+	localusername = variables[0]
+	localpassword = variables[1]
+	radiususer = variables[2]
+	radiuspass = variables[3]
+	scpuser = variables[4]
+	scppass = variables[5]
+	scpip = variables[6]
 
 """Currently, this script is written for Cisco IOS. In the future, variants
 may be written for other vendors' equipment."""
@@ -508,113 +510,119 @@ def scenario_configuration():
 
 
 def main_menu_selection():
-	print("""
-		!#*****************************************************************!#
-		!# Welcome to the CCIE Automation script! The purpose              !#
-		!# of this script is to streamline your CSR1000v deployment,       !#
-		!# as well as the physical switches in your environment. There     !#
-		!# are several files you will need to add to the local directory   !#
-		!# of this file before proceeding. Please be sure to define the    !#
-		!# name EXACTLY as requested.                                      !#
-		!#                                                                 !#
-		!# 1) userlist.txt - Includes your username and password, both     !#
-		!# local as well as RADIUS user password (This script is written   !#
-		!# for RADIUS using the FreeRADIUS server only. TACACS+ not        !#
-		!# included.                                                       !#  
-		!#                                                                 !#
-		!# Format (Must match exactly):                                    !#
-		!#                                                                 !#
-		!# LINE 1: [localuser]                                             !#
-		!# LINE 2: [localuser password]                                    !#
-		!# LINE 3: [radius user]                                           !#
-		!# LINE 4: [radius user password]                                  !#
-		!# LINE 5: [SCP Server Username]                                   !#
-		!# LINE 6: [SCP Server Password]                                   !#
-		!#                                                                 !#
-		!# 2) netserver.txt - Includes the IP of the server doing backups. !#
-		!#                                                                 !#
-		!# Format:                                                         !#
-		!#                                                                 !#
-		!# LINE 1: [backupserver ip]                                       !#
-		!#*****************************************************************!#
-	""")
-	in_place = query_yes_no("Do you already have the files in place?")
-	if in_place == True:
-		pass
-	else:
-		sys.exit("You need the files before you may proceed! Exiting.")
-	main_menu = {}
-	main_menu['1']="Establish basic connectivity to the boxes"
-	main_menu['2']="Perform reachability test"
-	main_menu['3']="Convert running configurations to baseline/hardening templates"
-	main_menu['4']="Enable premium license (Note: This MUST be enabled for certain scenario configurations!)"
-	main_menu['5']="Push Scenario Configurations (INE)"
-	main_menu['6']="Run configuration Backup"
-	main_menu['7']="Get BGP ASNs for all routers"
-	main_menu['8']="Wipe device configurations and start from scratch"
-	main_menu['9']="Exit"
-	while True:
-		options=main_menu.keys()
-		options.sort()
-		print "!#" + "*" * 95 + "!#"
-		print "!#" + " " * 95 + "!#"
-		for entry in options:
-			print '!# ' + '[+]' + entry, main_menu[entry] + " " * (89 - len(main_menu[entry])) + "!#"
-		print "!#" + " " * 95 + "!#"
-		print "!#" + "*" * 95 + "!#"
-		print ""
-		selection=raw_input("[*] Please select the option you'd like to run:\n")
-		if selection == '1':
-			domainname = raw_input("[?] What is your FQDN?\n")
-			create_threads(domainname, localusername, localpassword)
-		elif selection == '2':
-			ip_reachability_group()
-		elif selection == '3':
-			choose_scenario_type()
-			print "[+] Applying templates..."
-			reinitialize_basehardening()
-		elif selection == '4':
-			device = 'cisco_ios'
-			pbar = tqdm(total=100)
-			for DeviceName in Device:
-				device_ip = Devices[DeviceName][0]
-				print "\n[+] Progress:\n"
-				install_premium_license(device_ip, device, DeviceName)
-			pbar.close()
-		elif selection == '5':
-			choose_scenario_type()
-			print "[+] Verifying device reachability..."
-			ip_reachability_group()
-			exclude = query_yes_no("[?] Would you like to exclude any additional devices prior to pushing scenario configs?", default="n")
-			if exclude == False:
-				pass
-			else:
-				exclude_devices()
-			scenario_configuration()
-		elif selection == '6':
-			"""The Linux SCP server used in this script is natively installed. One issue you 
-			may encounter is an issue with one of your switches or routers not having a cipher
-			supported by the SCP server. To change this, you will need to edit your ssh configuration
-			in the /etc/ssh/sshd_config file"""
-			exclude = query_yes_no("[?] Would you like to exclude any devices from your backup?", default="n")
-			if exclude == False:
-				pass
-			else:
-				exclude_devices()
-			backup_config()
-		elif selection == '7':
-			print "Getting BGP ASNs for all routers..."
-			get_bgp_asn()
-		elif selection == '8':
-			exclude = query_yes_no("[?] Would you like to exclude any devices from your config wipe?", default="n")
-			if exclude == False:
-				pass
-			else:
-				exclude_devices()
-			default_configurations()
-		elif selection == '9':
-			print "Bye"
-			break
+	try:
+		print("""
+			!#*****************************************************************!#
+			!# Welcome to the CCIE Automation script! The purpose              !#
+			!# of this script is to streamline your CSR1000v deployment,       !#
+			!# as well as the physical switches in your environment. There     !#
+			!# are several files you will need to add to the local directory   !#
+			!# of this file before proceeding. Please be sure to define the    !#
+			!# name EXACTLY as requested.                                      !#
+			!#                                                                 !#
+			!# 1) userlist.txt - Includes your username and password, both     !#
+			!# local as well as RADIUS user password (This script is written   !#
+			!# for RADIUS using the FreeRADIUS server only. TACACS+ not        !#
+			!# included.                                                       !#  
+			!#                                                                 !#
+			!# Format (Must match exactly):                                    !#
+			!#                                                                 !#
+			!# LINE 1: [localuser]                                             !#
+			!# LINE 2: [localuser password]                                    !#
+			!# LINE 3: [radius user]                                           !#
+			!# LINE 4: [radius user password]                                  !#
+			!# LINE 5: [SCP Server Username]                                   !#
+			!# LINE 6: [SCP Server Password]                                   !#
+			!#                                                                 !#
+			!# 2) netserver.txt - Includes the IP of the server doing backups. !#
+			!#                                                                 !#
+			!# Format:                                                         !#
+			!#                                                                 !#
+			!# LINE 1: [backupserver ip]                                       !#
+			!#*****************************************************************!#
+		""")
+		in_place = query_yes_no("Do you already have the files in place?")
+		if in_place == True:
+			pass
 		else:
-			print "[!] Invalid option. Please try again.\n"
+			sys.exit("You need the files before you may proceed! Exiting.")
+		main_menu = {}
+		main_menu['1']="Establish basic connectivity to the boxes"
+		main_menu['2']="Perform reachability test"
+		main_menu['3']="Convert running configurations to baseline/hardening templates"
+		main_menu['4']="Enable premium license (Note: This MUST be enabled for certain scenario configurations!)"
+		main_menu['5']="Push Scenario Configurations (INE)"
+		main_menu['6']="Run configuration Backup"
+		main_menu['7']="Get BGP ASNs for all routers"
+		main_menu['8']="Wipe device configurations and start from scratch"
+		main_menu['9']="Exit"
+		while True:
+			options=main_menu.keys()
+			options.sort()
+			print "!#" + "*" * 95 + "!#"
+			print "!#" + " " * 95 + "!#"
+			for entry in options:
+				print '!# ' + '[+]' + entry, main_menu[entry] + " " * (89 - len(main_menu[entry])) + "!#"
+			print "!#" + " " * 95 + "!#"
+			print "!#" + "*" * 95 + "!#"
+			print ""
+			selection=raw_input("[*] Please select the option you'd like to run:\n")
+			if selection == '1':
+				domainname = raw_input("[?] What is your FQDN?\n")
+				create_threads(domainname, localusername, localpassword)
+			elif selection == '2':
+				ip_reachability_group()
+			elif selection == '3':
+				choose_scenario_type()
+				print "[+] Applying templates..."
+				reinitialize_basehardening()
+			elif selection == '4':
+				device = 'cisco_ios'
+				pbar = tqdm(total=100)
+				for DeviceName in Device:
+					device_ip = Devices[DeviceName][0]
+					print "\n[+] Progress:\n"
+					install_premium_license(device_ip, device, DeviceName)
+				pbar.close()
+			elif selection == '5':
+				choose_scenario_type()
+				print "[+] Verifying device reachability..."
+				ip_reachability_group()
+				exclude = query_yes_no("[?] Would you like to exclude any additional devices prior to pushing scenario configs?", default="n")
+				if exclude == False:
+					pass
+				else:
+					exclude_devices()
+				scenario_configuration()
+			elif selection == '6':
+				"""The Linux SCP server used in this script is natively installed. One issue you 
+				may encounter is an issue with one of your switches or routers not having a cipher
+				supported by the SCP server. To change this, you will need to edit your ssh configuration
+				in the /etc/ssh/sshd_config file"""
+				exclude = query_yes_no("[?] Would you like to exclude any devices from your backup?", default="n")
+				if exclude == False:
+					pass
+				else:
+					exclude_devices()
+				backup_config()
+			elif selection == '7':
+				print "Getting BGP ASNs for all routers..."
+				get_bgp_asn()
+			elif selection == '8':
+				exclude = query_yes_no("[?] Would you like to exclude any devices from your config wipe?", default="n")
+				if exclude == False:
+					pass
+				else:
+					exclude_devices()
+				default_configurations()
+			elif selection == '9':
+				print "Bye"
+				break
+			else:
+				print "[!] Invalid option. Please try again.\n"
+	except KeyboardInterrupt:
+		print "\n[!] Keyboard Interrupt detected. Goodbye!"
+		sys.exit()
+
+call_variables()
 main_menu_selection()
