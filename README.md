@@ -5,17 +5,17 @@ Use this script to automate a CSR1000V deployment, primarily within a CCIE lab e
 
 Built in python 2.7. The following are a few features currently available with this script:
 
-   - Basic configuration and in-band IP setup
+- Basic configuration and in-band IP setup
    
-   - Baseline and hardening script configuration
+- Baseline and hardening script configuration
 
-   - Scenarios configuration per INE's CCIE topology (Will introduce Micronics' labs into the mix soon)
+- Scenarios configuration per INE's CCIE topology (Will introduce Micronics' labs into the mix soon)
 
-   - Configuration backups to an SCP server (A Raspberry Pi was used for testing)
+- Configuration backups to an SCP server (A Raspberry Pi was used for testing)
 
-   - Install trial premium license for extra functionality i.e. Security and Data licenses (MPLS, IPSec)
+- Install trial premium license for extra functionality i.e. Security and Data licenses (MPLS, IPSec)
 
-Prerequisites & Dependencies:
+**Prerequisites & Dependencies:**
 
 	* Python (Duh)
 
@@ -31,7 +31,7 @@ Prerequisites & Dependencies:
 
 	* RADIUS or TACACS+ server for authentication (FreeRADIUS was used in testing on a Raspberry Pi)
 
-New in this release:
+**New in this release:**
 
 	[+] TQDM progress bar features
 	
@@ -41,7 +41,7 @@ New in this release:
 	
 	[+] Usernames/passwords for local, TACACS+/RADIUS, and SCP logins have been moved to a separate file to allow more flexibility.
 
-(Potential) Future Development:
+**(Potential) Future Development:**
 
 	[+] TextFSM integration for data parsing
 
@@ -49,7 +49,7 @@ New in this release:
 
 	[+] Jinja2 integration for ease of configuration templating
 	
-Caveats:
+**Caveats:**
 
 	Baseline script formatting must have the following requirements for configure replace to take it properly:
 	
@@ -70,7 +70,6 @@ Caveats:
 	
 	-Path to your scenario/baseline/hardening configurations on the box running the script
 
-Known Bugs:
+**Known Bugs:**
 
-	[+] When using the "configure replace" command on the CSRs, it has been discovered that the CSR may reload without user intervention. It is uncertain if this is
-	specific to the version of CSR code, or the hardware it is virtualized in.
+When using the "configure replace" command on the CSRs, it has been discovered that the CSR may reload without user intervention. It is uncertain if this is specific to the version of CSR code, or the hardware it is virtualized in.
