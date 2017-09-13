@@ -72,4 +72,5 @@ Paths should be defined in the script to suit your needs. Things that may need t
 
 **Known Bugs:**
 
-When using the "configure replace" command on the CSRs, it has been discovered that the CSR may reload without user intervention. It is uncertain if this is specific to the version of CSR code, or the hardware it is virtualized in.
+When using the "configure replace" command on the CSRs, it has been discovered that the CSR may reload without user intervention. After some investigation, there seems to be a loop running through the configuration replace multiple 
+times. Further investigation is required.
