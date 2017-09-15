@@ -69,8 +69,3 @@ Paths should be defined in the script to suit your needs. Things that may need t
 - Router/Switch serial IPs and ports, and in-band IPs
 	
 - Path to your scenario/baseline/hardening configurations on the box running the script
-
-**Known Bugs:**
-
-When using the "configure replace" command on the CSRs, it has been discovered that the CSR may reload without user intervention. After some investigation, there seems to be a loop running through the configuration replace multiple 
-times. Further investigation is required.
