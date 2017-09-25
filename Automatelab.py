@@ -1,7 +1,7 @@
 '''
-Modified September 4, 2017
+Modified September 24, 2017
 
-Version: 1.2
+Version: 1.3
 
 @author: OfWolfAndMan
 '''
@@ -17,23 +17,18 @@ from getpass import getpass
 import netmiko
 from netmiko import ConnectHandler
 from tqdm import tqdm
+from napalm import get_network_driver
 
-
-'''
-The two IPs is for CSRs under a VMWare hypervisor. One is the virtual serial 
-IP, and the other is the SSH IP. If the device is not configured, the serial 
-IP will be needed to remote and push initial commands to.
-'''
-Devices = {'SW4': ['192.168.10.105'], 'CSR1000V1': ['10.51.60.36', '192.168.10.120', '2001'],
-		   'CSR1000V2': ['10.51.60.37', '192.168.10.120', '2002'], 'CSR1000V3': ['10.51.60.38', '192.168.10.120', '2003'],
-		   'CSR1000V4': ['10.51.60.39', '192.168.10.120', '2004'], 'CSR1000V5': ['10.51.60.40', '192.168.10.120', '2005'],
-		   'CSR1000V6': ['10.51.60.41', '192.168.10.120', '2006'], 'CSR1000V7': ['10.51.60.42', '192.168.10.120', '2007'],
-		   'CSR1000V8': ['10.51.60.43', '192.168.10.120', '2008'], 'CSR1000V9': ['10.51.60.44', '192.168.10.120', '2009'],
-		   'CSR1000V10': ['10.51.60.45', '192.168.10.120', '2010'], 'SW1': ['192.168.10.102'],
+Devices = {'SW4': ['192.168.10.105'], 'IOSV1': ['10.51.60.36', '192.168.10.120', '2001'],
+		   'IOSV2': ['10.51.60.37', '192.168.10.120', '2002'], 'IOSV3': ['10.51.60.38', '192.168.10.120', '2003'],
+		   'IOSV4': ['10.51.60.39', '192.168.10.120', '2004'], 'IOSV5': ['10.51.60.40', '192.168.10.120', '2005'],
+		   'IOSV6': ['10.51.60.41', '192.168.10.120', '2006'], 'IOSV7': ['10.51.60.42', '192.168.10.120', '2007'],
+		   'IOSV8': ['10.51.60.43', '192.168.10.120', '2008'], 'IOSV9': ['10.51.60.44', '192.168.10.120', '2009'],
+		   'IOSV10': ['10.51.60.45', '192.168.10.120', '2010'], 'SW1': ['192.168.10.102'],
 		   'SW2': ['192.168.10.103'], 'SW3': ['192.168.10.104']
 		   }
 
-def call_variables():		   
+def call_variables():
 	path = '/root/scripts/CCIE_Automation/'
 	os.chdir(path)
 
@@ -49,7 +44,7 @@ def call_variables():
 	for eachline in variable_file_two.readlines():
 		variables.append(eachline.rstrip())
 	variable_file_two.close()
-			   
+
 	localusername = variables[0]
 	localpassword = variables[1]
 	radiususer = variables[2]
@@ -58,17 +53,12 @@ def call_variables():
 	scppass = variables[5]
 	scpip = variables[6]
 
-'''
-Currently, this script is written for Cisco IOS. In the future, variants
-may be written for other vendors' equipment.
-'''
+"""Currently, this script is written for Cisco IOS. In the future, variants
+may be written for other vendors' equipment."""
 
-'''
-Default="yes" in the function below represents a default 
+"""Default="yes" in the function below represents a default 
 option. If the option is not specified otherwise, it resorts
-to the default of "yes".
-'''
-
+to the default of "yes"."""
 def query_yes_no(question, default="y"):
 	"""Ask a yes/no question via raw_input() and return their answer.
 
@@ -100,10 +90,6 @@ def query_yes_no(question, default="y"):
 			sys.stdout.write("Please respond with 'y' or 'n' \n")
 
 def install_premium_license(device_ip, device, DeviceName):
-	'''
-	Enables a premium license on a CSR1000V IF it is not enabled
-	already. NOTE: This does not work after CSR image version 3.12
-	'''
 	print """
 			!#***************************************************************!#
 			!# It is advised to take a snapshot after installing the premium !#
@@ -131,7 +117,7 @@ def backup_config_single(device_ip, device, DeviceName):
 		successful_connections.append(DeviceName)
 	except:
 		unsuccessful_connections.append(DeviceName)
-		
+
 def exclude_devices():
 	print "What devices would you like to exclude? Please choose a device based on its hostname\n"
 	DeviceNames = []
@@ -153,7 +139,7 @@ def exclude_devices():
 		except KeyError:
 			print "[!] That device has already been excluded."
 			continue
-			
+
 def create_threads(domainname, localuser, localpass):
         threads = []
         for DeviceName in Devices:
@@ -166,7 +152,6 @@ def create_threads(domainname, localuser, localpass):
 
 
 def default_configurations():
-	'''Wipe device configurations.'''
 	device = 'cisco_ios'
 	print "[+] Initiating startup configuration wipe of all applicable devices\n"
 	for DeviceName in Devices:
@@ -183,10 +168,7 @@ def default_configurations():
 		except:
 			pass
 
-def ip_reachability_group():	
-	'''
-	Verifies IP reachability before proceeding with a task.
-	'''	
+def ip_reachability_group():
 	print "\n[+] Checking IP reachability. Please wait...\n"
 	pingable_devices = {}
 	global unpingable_devices
@@ -196,7 +178,7 @@ def ip_reachability_group():
 		pbar = tqdm(total=100)
 		for DeviceName in Devices:
 			device_ip = Devices[DeviceName][0]
-			""".rstrip is needed for the ip as .readline adds a \n to 
+			""".rstrip is needed for the ip as .readline adds a \n to
 			the lines' text"""
 			if "Linux" in platform.system():
 				ping_reply = subprocess.Popen(['ping', '-c', '2', '-w', '2', '-q', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
@@ -235,9 +217,6 @@ def ip_reachability_group():
 			print "{+}", DeviceName,"- ", Devices[DeviceName][0]
 
 def get_bgp_asn():
-	'''
-	Pulls BGP ASN numbers from all routers. Returns 'N/A' if none.
-	'''
 	device = 'cisco_ios'
 	for DeviceName in Devices:
 		if "CSR1000V" in DeviceName:
@@ -255,10 +234,6 @@ def get_bgp_asn():
 	print "Done"
 
 def backup_config():
-	'''
-	Backs up all device configs in the specified dictionary.
-	A Raspberry Pi was used as a test backup location in development.
-	'''
 	global unsuccessful_connections
 	unsuccessful_connections = []
 	global successful_connections
@@ -282,12 +257,12 @@ def backup_config():
 	print "Successful backups:"
 	for yz in successful_connections:
 		print yz
-	print "" 	
+	print ""
 	print "Unsuccessful backups:"
 	for xy in unsuccessful_connections:
 		print xy
 	print ""
-	
+
 def telnet_initial(domainname, localusername, localpassword, DeviceName):
 	try:
 		device_ip = Devices[DeviceName][0]
@@ -336,10 +311,8 @@ def telnet_initial(domainname, localusername, localpassword, DeviceName):
 		time.sleep(1)
 		connection.write("enable secret %s\r\n" % localpassword)
 		connection.write("ip route 0.0.0.0 0.0.0.0 10.51.60.33 2\n")
-		'''
-		The reason there is an AD of 2 for the default route is due to having them in 
-		the lab scenarios sometimes.
-		'''
+		#The reason there is an AD of 2 for the default route is due to having them in 
+		#the lab scenarios sometimes.
 		connection.write("username %s privilege 15 secret %s\r\n" % (localusername, localpassword) )
 		connection.write("line vty 0 4\r\n")
 		connection.write("login local\r\n")
@@ -357,7 +330,7 @@ def telnet_initial(domainname, localusername, localpassword, DeviceName):
 	except:
 		print "[!] Serial over telnet attempt failed for device %s." % DeviceName
 
-	
+
 def telnet_attempt():
 	try:
 		print "[+] Attempting Out-of-Band IP configuration of device..."
@@ -377,12 +350,12 @@ def telnet_attempt():
 		router_output = connection.read_until("Username:", reading_timeout)
 		#Enter the username when asked and a "\n" for Enter
 		connection.write(localusername + "\n")
-	
+
 		#Waiting to be asked for a password
 		router_output = connection.read_until("Password:", reading_timeout)
 		#Enter the password when asked and a "\n" for Enter
 		connection.write(localpassword + "\n")
-		time.sleep(30)	
+		time.sleep(30)
 		#Entering global config mode
 		connection.write("end\n")
 		time.sleep(1)
@@ -400,14 +373,10 @@ def telnet_attempt():
 		connection.close()
 		time.sleep(20)
 	except:
-		print "[!] Serial over telnet attempt failed for device %s." % DeviceName
+		print "[!] Serial over telnet attempt failed for device {}.".format(DeviceName)
 		unsuccessful_connections.append(DeviceName)
 
 def reinitialize_basehardening():
-	'''
-	Reloads specific configuration without reloading or appending
-	startup-config to the running-config.
-	'''
 	device = 'cisco_ios'
 	while True:
 		localorradius = raw_input("[?] Are you currently using RADIUS or local credentials? [local/radius]\n")
@@ -422,62 +391,28 @@ def reinitialize_basehardening():
 		else:
 			print "[!] Invalid input. Please try again.\n"
 			continue
-	deploy_or_copy = query_yes_no("[?] Do you want to copy the scripts now and deploy them? If you just want to deploy without copying to devices first, press 'n'.")
-	if deploy_or_copy == True:
-		print "[+] Copying baseline and hardening scripts to devices.\n"
-		print "\n[+] Progress\n"
-		pbar = tqdm(total=100)
-		for DeviceName in Devices:
-			device_ip = Devices[DeviceName][0]
-			try:
-				net_connect = ConnectHandler(device_type = device, ip = device_ip, username = username, password = password)
-				output = net_connect.send_command("copy scp://%s@%s/scripts/CCIE_Automation/Baseline\&Hardening_Configurations/Base\&Hardening_%s.txt bootflash:Base&Hardening%s\n\n%s\n" % (scpuser, scpip, DeviceName, DeviceName, scppass))
-				net_connect.disconnect()
-			except netmiko.ssh_exception.NetMikoTimeoutException:
-				pass
-			pbar.update(100/len(Devices))
-		print "[+] Copying of baseline and hardening configurations to bootflash completed.\n"
-		pbar.close()
-		print "[+] Reverting to Baseline/Hardening configs..."
-		print "\n[+] Progress\n"
-		pbar = tqdm(total=100)
-		for DeviceName in Devices:
-			device_ip = Devices[DeviceName][0]
-			try:
-				net_connect = ConnectHandler(device_type = device, ip = device_ip, username = username, password = password)
-				output = net_connect.send_command("configure replace bootflash:Base&Hardening%s list\ny\ny\n" % DeviceName)
-				net_connect.disconnect()
-			except netmiko.ssh_exception.NetMikoTimeoutException:
-				pass
-			pbar.update(100/float(len(Devices)))
-		print "[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n"
-		pbar.close()
-	else:
-		print "[+] Converting to Baseline/Hardening configs..."
-		print "\n[+] Progress\n"
-		pbar = tqdm(total=100)
-		for DeviceName in Devices:
-			device_ip = Devices[DeviceName][0]
-			try:
-				net_connect = ConnectHandler(device_type = device, ip = device_ip, username = username, password = password)
-				output = net_connect.send_command("configure replace bootflash:Base&Hardening%s list\ny\ny\n" % DeviceName)
-				net_connect.disconnect()
-			except netmiko.ssh_exception.NetMikoTimeoutException:
-				pass
-			pbar.update(100/len(Devices))
-		print "[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n"
-		pbar.close()
+	print "[+] Copying baseline and hardening scripts to devices.\n"
+	print "\n[+] Progress\n"
+	pbar = tqdm(total=100)
+        driver = get_network_driver('ios')
+	for DeviceName in Devices:
+		device_ip = Devices[DeviceName][0]
+		optional_args = {'global_delay_factor': 3}
+		device = driver(device_ip, username, password, optional_args=optional_args)
+		device.open()
+		device.load_replace_candidate(filename='Baseline&Hardening_Configurations/Base&Hardening_{}.txt'.format(DeviceName))
+		device.commit_config()
+		device.close()
+		pbar.update(100/len(Devices))
+	pbar.close()
+	print "[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n"
 def choose_scenario_type():
-	'''
-	Segmentation logic used to identify device type and include
-	only subsets of devices.
-	'''
 	while True:
 		RandS = raw_input('[?] Are these configurations for a switching lab, a routing lab, or both? Choose one of the three options: [sw/rt/both]')
 		if RandS == 'rt':
 			Switching_Devices = []
 			for DeviceName in Devices:
-				if 'CSR1000V' not in DeviceName:
+				if 'IOSV' not in DeviceName:
 					Switching_Devices.append(DeviceName)
 				else:
 					pass
@@ -509,7 +444,9 @@ def scenario_configuration():
 	print "[+] Which Baseline Configs would you like to implement?\n"
 	dir_output = []
 	for dir in enumerate(os.listdir('.'), start = 1):
+		#print "[+] %d %s" % (ij, dir)
 		dir_output.append(dir)
+		#dir_output[ij] = dir
 	#Using the below, I was able to print the options in three columns
 	for a,b,c in zip(dir_output[::3],dir_output[1::3],dir_output[2::3]):
 		print '{:<50}{:<43}{:<}'.format(a,b,c)
@@ -537,7 +474,7 @@ def scenario_configuration():
 					output = net_connect.send_config_set(command_set)
 					net_connect.disconnect()
 				except netmiko.ssh_exception.NetMikoTimeoutException:
-					pass	
+					pass
 				print "[+] Scenario configuration of device %s successful.\n" % DeviceName
 				selected_cmd_file.close()
 		break

@@ -1,5 +1,5 @@
 # CCIE-Lab-Automation
-## Version 1.2
+## Version 1.3
 
 Use this script to automate a CSR1000V deployment, primarily within a CCIE lab environment.
 
@@ -26,6 +26,8 @@ Built in python 2.7. The following are a few features currently available with t
   + All other libraries come with python 2.7 natively
 	   
   + TQDM (Used as a progress bar for tasks)
+  
+  + NAPALM (Used for the configure replace operations)
 
 * SCP server for backups (Can modify for FTP)
 
@@ -33,13 +35,9 @@ Built in python 2.7. The following are a few features currently available with t
 
 **New in this release:**
 
-- TQDM progress bar features
-	
-- Eliminate need to reload after completion of configuration by introducing the "configure replace" option
-	
-- Improved decision logic
-	
-- Usernames/passwords for local, TACACS+/RADIUS, and SCP logins have been moved to a separate file to allow more flexibility.
+- NAPALM used for configure replace operation as the standard netmiko operation was buggy
+
+- Configurations updated to address issues with configure replace compatibility
 
 **(Potential) Future Development:**
 
@@ -59,6 +57,9 @@ Baseline script formatting must have the following requirements for configure re
 	
 - Subcommands, such as those under "interface Gigx/x", must have a space in them to display hierarchy. Otherwise those lines
 won't be added.
+
+- ALL whitespaces should be filled with "!". In addition, it is advised against using a configuration with a banner
+  in it during configure replace operations
 
 Paths should be defined in the script to suit your needs. Things that may need to be changed in the script includes:
 	

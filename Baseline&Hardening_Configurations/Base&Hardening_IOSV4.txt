@@ -1,0 +1,115 @@
+!
+version 15.5
+!
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service password-encryption
+!
+hostname IOSV4
+!
+no logging console
+!
+aaa new-model
+aaa session-id common
+!
+aaa authentication attempts login 4
+aaa authentication login default group radius local
+aaa authentication enable default group radius enable
+aaa authorization exec default group radius local
+aaa accounting exec default start-stop group radius
+!
+ip domain-name yomommashouse.com
+ip domain-lookup
+ip name-server 208.67.222.222
+ip name-server 208.67.220.220
+!
+username therootbridge privilege 15 secret secretpassword
+!
+enable secret secretpassword
+!
+crypto key generate rsa general-keys modulus 2048
+!
+archive
+ path flash:archive
+ write-memory
+!
+ip tcp synwait-time 10
+ip ssh time-out 60
+ip ssh authentication-retries 3
+ip ssh source GigabitEthernet0/1
+ip ssh version 2
+ip scp server enable
+!
+ip radius source-interface GigabitEthernet0/1
+no ip http server
+no ip http secure-server
+redundancy
+no ipv6 cef
+!
+interface GigabitEthernet0/0
+ description <===Virtual Network Connection===>
+ no ip proxy-arp
+ no ip unreachables
+ no ip redirects
+ no shutdown
+
+interface GigabitEthernet0/1
+ description <===Connection to Lab Full Mesh===>
+ ip address 10.51.60.39 255.255.255.224
+ no shutdown
+ no ip proxy-arp
+ no ip unreachables
+ no ip redirects
+ no snmp trap link-status
+!
+interface GigabitEthernet0/2
+ description <===UNUSED===>
+ no ip proxy-arp
+ no ip unreachables
+ no ip redirects
+ no snmp trap link-status
+!
+ip access-list standard SSH_ACCESS
+ remark JumpBox_VM Access
+ permit 10.100.100.100 log
+ remark Rpi3 Access
+ permit 192.168.15.188 log
+ remark Trusted_Users Access
+ permit 192.168.100.0 0.0.0.255 log
+ permit 172.17.51.0 0.0.0.255 log
+!
+ip route 0.0.0.0 0.0.0.0 10.51.60.33 2
+!
+radius server PI
+ address ipv4 192.168.15.180 auth-port 1812 acct-port 1813
+ key 7 Radiuskey
+!
+alias exec sr show run
+alias exec siib show ip int brief
+alias exec scn show cdp neighbors
+!
+
+line con 0
+ exec-timeout 5 0
+ privilege level 15
+line aux 0
+ no exec
+ transport input none
+line vty 0 4
+ access-class SSH_ACCESS in
+ exec-timeout 10
+ privilege level 15
+ transport input ssh
+line vty 5 15
+ no exec
+ transport input none
+!
+ntp source GigabitEthernet0/1
+ntp server time-c.nist.gov 
+ntp server utcnist.colorado.edu 
+!
+end
+!
+write memory
+

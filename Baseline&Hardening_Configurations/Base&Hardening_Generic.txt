@@ -1,5 +1,5 @@
 !
-version 15.4
+version 15.5
 !
 enable
 !
@@ -21,21 +21,21 @@ aaa authorization exec default group radius local
 aaa accounting exec default start-stop group radius
 
 ip domain-lookup
-ip name-server [name server 1]
-ip name-server [name server 2]
+ip name-server 208.67.222.222
+ip name-server 208.67.220.220
 
 ip tcp synwait-time 10
 ip ssh time-out 60
 ip ssh authentication-retries 3
-ip ssh source GigabitEthernet2
+ip ssh source GigabitEthernet0/1
 ip ssh version 2
 ip scp server enable
 
-ip radius source-interface GigabitEthernet2
+ip radius source-interface GigabitEthernet0/1
 no ip http server
 no ip http secure-server
 
-interface GigabitEthernet1
+interface GigabitEthernet0/0
 no ip proxy-arp
 no ip unreachables
 no ip redirects
@@ -47,20 +47,20 @@ no ip unreachables
 no ip redirects
 no snmp trap link-status
 
-interface GigabitEthernet1
+interface GigabitEthernet0/0
 description <===Virtual Network Connection===>
 
-interface GigabitEthernet2
+interface GigabitEthernet0/1
 description <===Connection to Lab Full Mesh===>
 
-interface GigabitEthernet3
+interface GigabitEthernet0/2
 description <===UNUSED===>
 
 ip access-list standard SSH_ACCESS
  remark JumpBox_VM Access
  permit 10.100.100.100 log
  remark Rpi3 Access
- permit [ip address] log
+ permit 192.168.15.188 log
  remark Trusted_Users Access
  permit 192.168.100.0 0.0.0.255 log
  permit 172.17.51.0 0.0.0.255 log
@@ -72,8 +72,8 @@ kron occurrence Daily_Backup at 16:30 recurring
  policy-list Daily-Backup
  
 radius server PI
- address ipv4 [ip address] auth-port 1812 acct-port 1813
- key 7 [RADIUS key]
+ address ipv4 192.168.15.180 auth-port 1812 acct-port 1813
+ key 7 Radiuskey
 
 alias exec sr show run
 alias exec siib show ip int brief
@@ -81,17 +81,17 @@ alias exec scn show cdp neighbo
 
 banner login ^CC
 ******************************  WARNING  ***************************
-| This system is restricted solely to [entity] authorized personnel |
+| This system is restricted solely to KaliMac authorized personnel |
 | for legitimate business purposes only. The actual or attempted   |
 | unauthorized access, use or modification of this systems strictly|
-| prohibited.  Unauthorized personnel are subject to [entity]'s     |
+| prohibited.  Unauthorized personnel are subject to KaliMac's     |
 | disciplinary proceedings and/or criminal/civil penalties under   |
 | state, federal or other applicable domestic/foreign laws. The    |
 | use of this system is monitored and recorded for administrative  |
 | and security reasons. Anyone accessing this system expressly     |
 | consents to such monitoring and is advised that if such          |
 | monitoring reveals possible evidence of criminal activity,       |
-| [entity] may provide the evidence of such activity to law         |
+| KaliMac may provide the evidence of such activity to law         |
 | enforcement officials.                                           |
 ********************************************************************
 ^C
@@ -111,9 +111,9 @@ line vty 5 15
  no exec
  transport input none
 
-ntp source G2
-ntp server [ntpsvr 1] 
-ntp server [ntpsvr 2] 
+ntp source GigabitEthernet0/1
+ntp server time-c.nist.gov 
+ntp server utcnist.colorado.edu 
 
 end
 
