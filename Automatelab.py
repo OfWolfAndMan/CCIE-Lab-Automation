@@ -526,14 +526,17 @@ def main_menu_selection():
 		main_menu['6']="Run configuration Backup"
 		main_menu['7']="Get BGP ASNs for all routers"
 		main_menu['8']="Wipe device configurations and start from scratch"
-		main_menu['9']="Exit"
+		main_menu['9']="Get device facts"
+		main_menu['10']="Exit"
 		while True:
 			options=main_menu.keys()
-			options.sort()
+			options.sort(key=int)
 			print("!#" + "*" * 95 + "!#")
 			print("!#" + " " * 95 + "!#")
+			menu_num = 1
 			for entry in options:
-				print '!# ' + '[+]' + entry, main_menu[entry] + " " * (89 - len(main_menu[entry])) + "!#"
+				print '!# ' + '[+]' + entry, main_menu[entry] + " " * (90 - len(main_menu[entry]) - len(str(menu_num))) + "!#"
+				menu_num += 1
 			print("!#" + " " * 95 + "!#")
 			print("!#" + "*" * 95 + "!#")
 			print("")
@@ -587,6 +590,9 @@ def main_menu_selection():
 					exclude_devices()
 				default_configurations()
 			elif selection == '9':
+				print("This option is under construction.\n")
+				continue
+			elif selection == '10':
 				print("Bye")
 				break
 			else:
