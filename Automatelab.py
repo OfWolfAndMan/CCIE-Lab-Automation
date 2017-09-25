@@ -530,13 +530,13 @@ def main_menu_selection():
 		while True:
 			options=main_menu.keys()
 			options.sort()
-			print "!#" + "*" * 95 + "!#"
-			print "!#" + " " * 95 + "!#"
+			print("!#" + "*" * 95 + "!#")
+			print("!#" + " " * 95 + "!#")
 			for entry in options:
 				print '!# ' + '[+]' + entry, main_menu[entry] + " " * (89 - len(main_menu[entry])) + "!#"
-			print "!#" + " " * 95 + "!#"
-			print "!#" + "*" * 95 + "!#"
-			print ""
+			print("!#" + " " * 95 + "!#")
+			print("!#" + "*" * 95 + "!#")
+			print("")
 			selection=raw_input("[*] Please select the option you'd like to run:\n")
 			if selection == '1':
 				domainname = raw_input("[?] What is your FQDN?\n")
@@ -545,19 +545,19 @@ def main_menu_selection():
 				ip_reachability_group()
 			elif selection == '3':
 				choose_scenario_type()
-				print "[+] Applying templates..."
+				print("[+] Applying templates...")
 				reinitialize_basehardening()
 			elif selection == '4':
 				device = 'cisco_ios'
 				pbar = tqdm(total=100)
 				for DeviceName in Device:
 					device_ip = Devices[DeviceName][0]
-					print "\n[+] Progress:\n"
+					print("\n[+] Progress:\n")
 					install_premium_license(device_ip, device, DeviceName)
 				pbar.close()
 			elif selection == '5':
 				choose_scenario_type()
-				print "[+] Verifying device reachability..."
+				print("[+] Verifying device reachability...")
 				ip_reachability_group()
 				exclude = query_yes_no("[?] Would you like to exclude any additional devices prior to pushing scenario configs?", default="n")
 				if exclude == False:
@@ -577,7 +577,7 @@ def main_menu_selection():
 					exclude_devices()
 				backup_config()
 			elif selection == '7':
-				print "Getting BGP ASNs for all routers..."
+				print("Getting BGP ASNs for all routers...")
 				get_bgp_asn()
 			elif selection == '8':
 				exclude = query_yes_no("[?] Would you like to exclude any devices from your config wipe?", default="n")
@@ -587,12 +587,12 @@ def main_menu_selection():
 					exclude_devices()
 				default_configurations()
 			elif selection == '9':
-				print "Bye"
+				print("Bye")
 				break
 			else:
-				print "[!] Invalid option. Please try again.\n"
+				print("[!] Invalid option. Please try again.\n")
 	except KeyboardInterrupt:
-		print "\n[!] Keyboard Interrupt detected. Goodbye!"
+		print("\n[!] Keyboard Interrupt detected. Goodbye!")
 		sys.exit()
 
 call_variables()
