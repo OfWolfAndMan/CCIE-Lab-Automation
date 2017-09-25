@@ -58,12 +58,12 @@ description <===UNUSED===>
 
 ip access-list standard SSH_ACCESS
  remark JumpBox_VM Access
- permit 10.100.100.100 log
+ permit 10.1.1.5 log
  remark Rpi3 Access
- permit 192.168.15.188 log
+ permit 192.168.1.15 log
  remark Trusted_Users Access
  permit 192.168.100.0 0.0.0.255 log
- permit 172.17.51.0 0.0.0.255 log
+ permit 172.17.1.0 0.0.0.255 log
 
 kron policy-list Daily_Backup
  cli write memory
