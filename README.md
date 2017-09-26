@@ -1,5 +1,5 @@
 # CCIE-Lab-Automation
-## Version 1.4
+## Version 1.5
 
 Use this script to automate a CSR1000V deployment, primarily within a CCIE lab environment.
 
@@ -39,7 +39,7 @@ Built in python 2.7. The following are a few features currently available with t
 
 - Configurations updated to address issues with configure replace compatibility
 
-- Moved device variables into a YAML file and added capability to convert to dictionary
+- IP Reachability test mandatory prior to running tasks; no longer a menu option.
 
 **(Potential) Future Development:**
 

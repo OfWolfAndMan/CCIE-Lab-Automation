@@ -1,7 +1,7 @@
 '''
 Modified September 26, 2017
 
-Version: 1.4
+Version: 1.5
 
 @author: OfWolfAndMan
 '''
@@ -19,12 +19,10 @@ from netmiko import ConnectHandler
 from tqdm import tqdm
 import yaml
 
-stream = file('device-vars.yml', 'r')
-Devices = (yaml.load(stream))['Devices']
 
 def call_variables():
-	#path = '/root/scripts/CCIE_Automation/'
-	#os.chdir(path)
+	path = '/root/scripts/CCIE_Automation/'
+	os.chdir(path)
 
 	global localusername, localpassword, radiususer, radiuspass, scpuser, scppass, scpip
 	variables = []
@@ -84,14 +82,14 @@ def query_yes_no(question, default="y"):
 			sys.stdout.write("Please respond with 'y' or 'n' \n")
 
 def install_premium_license(device_ip, device, DeviceName):
-	print """
+	print("""
 			!#***************************************************************!#
 			!# It is advised to take a snapshot after installing the premium !#
 			!# license on each box in ESXi, as the trials are only limited   !#
 			!# to so many days. Be sure to take your snapshots after running !#
 			!# this script!                                                  !#
 			!#***************************************************************!#
-		  """
+		  """)
 	try:
 		net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
 		output = net_connect.send_command("\nconfigure terminal\nlicense boot level premium\nyes\nend\nwrite\nreload\n")
@@ -116,7 +114,7 @@ def exclude_devices():
 	print "What devices would you like to exclude? Please choose a device based on its hostname\n"
 	DeviceNames = []
 	for DeviceName in Devices:
-		print "{+} ", DeviceName, "- ",	 Devices[DeviceName]['mgmt_ip']
+		print "[+] ", DeviceName, "- ",	 Devices[DeviceName]['mgmt_ip']
 		DeviceNames.append(DeviceName)
 	print "[+] To finish your selections, type in 'done' when you are complete."
 	while True:
@@ -163,7 +161,7 @@ def default_configurations():
 			pass
 
 def ip_reachability_group():
-	print "\n[+] Checking IP reachability. Please wait...\n"
+	print "\n[+] Checking IP reachability. Please wait..."
 	pingable_devices = {}
 	global unpingable_devices
 	unpingable_devices = {}
@@ -177,7 +175,7 @@ def ip_reachability_group():
 			if "Linux" in platform.system():
 				ping_reply = subprocess.Popen(['ping', '-c', '2', '-w', '2', '-q', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
 			#Darwin is Mac OSX
-			elif "darwin" in platform.system():
+			elif "Darwin" in platform.system():
 				ping_reply = subprocess.Popen(['ping', '-c', '2', '-t', '2', '-q', '-n', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
 				"""Subprocess for Cygwin still not supported"""
 			else:
@@ -191,25 +189,20 @@ def ip_reachability_group():
 				unpingable_devices[DeviceName] = device_ip
 			pbar.update(100/float(len(Devices)))
 		pbar.close()
-	print "[+]The following devices were reachable:\n"
-	for reach in pingable_devices:
-		print "{+} ", reach,"- ", pingable_devices[reach]
-	print ""
-	print "[!]The following devices were unreachable:\n"
+	print("")
+	print("[!] Removing devices...")
+	for rdevice in unpingable_devices:
+		del Devices[rdevice]
+	print("\n[!] Removed from future tasks:")
+	print("*" * 30)
 	for unreach in unpingable_devices:
-		print "{-} ", unreach,"- ", unpingable_devices[unreach]
-	print ""
-	remove_devices = query_yes_no("[?] Would you like to remove the devices that are unpingable from your tasks for now?")
-	if remove_devices == False:
-		pass
-	else:
-		for rdevice in unpingable_devices:
-			del Devices[rdevice]
-		print "[+] Devices removed for the remainder of your tasks."
-		print "[+] Devices remaining:"
-		for DeviceName in Devices:
-			print "{+}", DeviceName,"- ", Devices[DeviceName]['mgmt_ip']
-
+		print("| [-] {} - {}".format(unreach, unpingable_devices[unreach]))
+	print("*" * 30)
+	print("\n[+] Devices remaining:")
+	print("{}".format("*" * 30))
+	for DeviceName in Devices:
+		print("| [+] {} - {}".format(DeviceName,Devices[DeviceName]['mgmt_ip']))
+	print("*" * 30)
 def get_bgp_asn():
 	device = 'cisco_ios'
 	for DeviceName in Devices:
@@ -249,11 +242,11 @@ def backup_config():
 	print("")
 	print("Successful backups:")
 	for yz in successful_connections:
-		print("{+} {}".format(yz))
+		print("[+] {}".format(yz))
 	print("")
 	print("Unsuccessful backups:")
 	for xy in unsuccessful_connections:
-		print("{-} {}".format(xy))
+		print("[-] {}".format(xy))
 	print("")
 
 def telnet_initial(domainname, localusername, localpassword, DeviceName):
@@ -552,15 +545,14 @@ def main_menu_selection():
 			sys.exit("You need the files before you may proceed! Exiting.")
 		main_menu = {}
 		main_menu['1']="Establish basic connectivity to the boxes"
-		main_menu['2']="Perform reachability test"
-		main_menu['3']="Convert running configurations to baseline/hardening templates"
-		main_menu['4']="Enable premium license (Note: This MUST be enabled for certain scenario configurations!)"
-		main_menu['5']="Push Scenario Configurations (INE)"
-		main_menu['6']="Run configuration Backup"
-		main_menu['7']="Get BGP ASNs for all routers"
-		main_menu['8']="Wipe device configurations and start from scratch"
-		main_menu['9']="Get device facts"
-		main_menu['10']="Exit"
+		main_menu['2']="Convert running configurations to baseline/hardening templates"
+		main_menu['3']="Enable premium license (Note: This MUST be enabled for certain scenario configurations!)"
+		main_menu['4']="Push Scenario Configurations (INE)"
+		main_menu['5']="Run configuration Backup"
+		main_menu['6']="Get BGP ASNs for all routers"
+		main_menu['7']="Wipe device configurations and start from scratch"
+		main_menu['8']="Get device facts"
+		main_menu['9']="Exit"
 		while True:
 			options=main_menu.keys()
 			options.sort(key=int)
@@ -578,12 +570,10 @@ def main_menu_selection():
 				domainname = raw_input("[?] What is your FQDN?\n")
 				create_threads(domainname, localusername, localpassword)
 			elif selection == '2':
-				ip_reachability_group()
-			elif selection == '3':
 				choose_scenario_type()
 				print("[+] Applying templates...")
 				reinitialize_basehardening()
-			elif selection == '4':
+			elif selection == '3':
 				device = 'cisco_ios'
 				pbar = tqdm(total=100)
 				for DeviceName in Devices:
@@ -591,17 +581,15 @@ def main_menu_selection():
 					print("\n[+] Progress:\n")
 					install_premium_license(device_ip, device, DeviceName)
 				pbar.close()
-			elif selection == '5':
+			elif selection == '4':
 				choose_scenario_type()
-				print("[+] Verifying device reachability...")
-				ip_reachability_group()
 				exclude = query_yes_no("[?] Would you like to exclude any additional devices prior to pushing scenario configs?", default="n")
 				if exclude == False:
 					pass
 				else:
 					exclude_devices()
 				scenario_configuration()
-			elif selection == '6':
+			elif selection == '5':
 				"""The Linux SCP server used in this script is natively installed. One issue you 
 				may encounter is an issue with one of your switches or routers not having a cipher
 				supported by the SCP server. To change this, you will need to edit your ssh configuration
@@ -612,19 +600,19 @@ def main_menu_selection():
 				else:
 					exclude_devices()
 				backup_config()
-			elif selection == '7':
+			elif selection == '6':
 				print("Getting BGP ASNs for all routers...")
 				get_bgp_asn()
-			elif selection == '8':
+			elif selection == '7':
 				exclude = query_yes_no("[?] Would you like to exclude any devices from your config wipe?", default="n")
 				if exclude == False:
 					pass
 				else:
 					exclude_devices()
 				default_configurations()
-			elif selection == '9':
+			elif selection == '8':
 				get_the_facts()
-			elif selection == '10':
+			elif selection == '9':
 				print("Bye")
 				break
 			else:
@@ -633,5 +621,15 @@ def main_menu_selection():
 		print("\n[!] Keyboard Interrupt detected. Goodbye!")
 		sys.exit()
 
-call_variables()
-main_menu_selection()
+if __name__ == "__main__":
+	stream = file('device-vars.yml', 'r')
+	Devices = (yaml.load(stream))['Devices']
+	print "[!] Need to check IP reachability and removable any unreachable devices first. Please wait..."
+	ip_reachability_group()
+	in_place = query_yes_no("\nDevices that are reachable are listed above. Proceed?")
+	if in_place == True:
+			pass
+	else:
+		sys.exit("Exiting!")
+	call_variables()
+	main_menu_selection()
