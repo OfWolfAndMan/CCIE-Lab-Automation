@@ -234,7 +234,6 @@ def backup_config():
 	global successful_connections
 	successful_connections = []
 	print "[+] Initiating device backup procedure."
-	global DeviceName
 	for DeviceName in Devices:
 		global device_ip
 		device_ip = Devices[DeviceName]['mgmt_ip']
@@ -246,17 +245,17 @@ def backup_config():
 			successful_connections.append(DeviceName)
 		except:
 			print '[+] Could not SSH to device %s. Trying serial connection...' % DeviceName
-			telnet_attempt()
+			telnet_attempt(DeviceName)
 			backup_config_single(device_ip, device, DeviceName)
-	print ""
-	print "Successful backups:"
+	print("")
+	print("Successful backups:")
 	for yz in successful_connections:
-		print yz
-	print ""
-	print "Unsuccessful backups:"
+		print("{+} %s" % yz)
+	print("")
+	print("Unsuccessful backups:")
 	for xy in unsuccessful_connections:
-		print xy
-	print ""
+		print("{-} %s" % xy)
+	print("")
 
 def telnet_initial(domainname, localusername, localpassword, DeviceName):
 	try:
@@ -326,7 +325,7 @@ def telnet_initial(domainname, localusername, localpassword, DeviceName):
 		print "[!] Serial over telnet attempt failed for device %s." % DeviceName
 
 
-def telnet_attempt():
+def telnet_attempt(DeviceName):
 	try:
 		print "[+] Attempting Out-of-Band IP configuration of device..."
 		#Define telnet parameters
