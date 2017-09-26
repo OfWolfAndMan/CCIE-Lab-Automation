@@ -17,15 +17,14 @@ from getpass import getpass
 import netmiko
 from netmiko import ConnectHandler
 from tqdm import tqdm
-from napalm import get_network_driver
 import yaml
 
 stream = file('device-vars.yml', 'r')
 Devices = (yaml.load(stream))['Devices']
 
 def call_variables():
-	path = '/root/scripts/CCIE_Automation/'
-	os.chdir(path)
+	#path = '/root/scripts/CCIE_Automation/'
+	#os.chdir(path)
 
 	global localusername, localpassword, radiususer, radiuspass, scpuser, scppass, scpip
 	variables = []
@@ -75,7 +74,7 @@ def query_yes_no(question, default="y"):
 	else:
 		raise ValueError("invalid default answer: '%s'" % default)
 	while True:
-		sys.stdout.write(question + prompt)
+		sys.stdout.write("{}{}".format(question, prompt))
 		choice = raw_input().lower()
 		if default is not None and choice == '':
 			return valid[default]
@@ -107,7 +106,7 @@ def install_premium_license(device_ip, device, DeviceName):
 def backup_config_single(device_ip, device, DeviceName):
 	try:
 		net_connect = ConnectHandler(device_type = device, ip = device_ip, username = localusername, password = localpassword)
-		output = net_connect.send_command('copy running-config scp://root@192.168.15.188/Documents/backups/%s.txt\n\n\n\n%s\n' % (DeviceName, scppass))
+		output = net_connect.send_command('copy running-config scp://root@192.168.15.188/Documents/backups/{}.txt\n\n\n\n{}\n'.format(DeviceName, scppass))
 		net_connect.disconnect()
 		successful_connections.append(DeviceName)
 	except:
@@ -130,7 +129,7 @@ def exclude_devices():
 				continue
 			else:
 				del Devices[exclude_device]
-				print "[+] Excluded device %s from task." % exclude_device
+				print "[+] Excluded device {} from task.".format(exclude_device)
 		except KeyError:
 			print "[!] That device has already been excluded."
 			continue
@@ -155,10 +154,10 @@ def default_configurations():
 			net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
 			output = net_connect.send_command_expect("\nend\nwrite memory\nwrite erase\n\nreload\n\n")
 			net_connect.disconnect()
-			print "[+] Configuration wiped successfully for device %s" % DeviceName
+			print "[+] Configuration wiped successfully for device {}".format(DeviceName)
 			time.sleep(5)
 		except netmiko.ssh_exception.NetMikoTimeoutException:
-			print "[!] Could not connect to device %s. Skipping..." % DeviceName
+			print "[!] Could not connect to device {}. Skipping...".format(DeviceName)
 			continue
 		except:
 			pass
@@ -222,7 +221,7 @@ def get_bgp_asn():
 				newoutput = output.replace("router bgp ", "")
 			else:
 				newoutput = "N/A"
-			print "ASN for device %s: %s" % (DeviceName, newoutput)
+			print "ASN for device {}: {}".format(DeviceName, newoutput)
 			net_connect.disconnect()
 		else:
 			pass
@@ -240,27 +239,27 @@ def backup_config():
 		device = 'cisco_ios'
 		try:
 			net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
-			output = net_connect.send_command('copy running-config scp://root@%s/Documents/backups/%s.txt\n\n\n\n%s\n' % (scpip, DeviceName, scppass))
+			output = net_connect.send_command('copy running-config scp://root@{}/Documents/backups/{}.txt\n\n\n\n{}\n'.format(scpip, DeviceName, scppass))
 			net_connect.disconnect()
 			successful_connections.append(DeviceName)
 		except:
-			print '[+] Could not SSH to device %s. Trying serial connection...' % DeviceName
+			print '[+] Could not SSH to device {}. Trying serial connection...'.format(DeviceName)
 			telnet_attempt(DeviceName)
 			backup_config_single(device_ip, device, DeviceName)
 	print("")
 	print("Successful backups:")
 	for yz in successful_connections:
-		print("{+} %s" % yz)
+		print("{+} {}".format(yz))
 	print("")
 	print("Unsuccessful backups:")
 	for xy in unsuccessful_connections:
-		print("{-} %s" % xy)
+		print("{-} {}".format(xy))
 	print("")
 
 def telnet_initial(domainname, localusername, localpassword, DeviceName):
 	try:
 		device_ip = Devices[DeviceName]['mgmt_ip']
-		print "[+] Attempting Out-of-Band IP configuration of device %s..." % DeviceName
+		print "[+] Attempting Out-of-Band IP configuration of device {}...".format(DeviceName)
 		serialip = Devices[DeviceName]['serial_ip']
 		port = Devices[DeviceName]['serial_port']
 		#Specify the connection timeout in seconds for blocking operations, like the connection attempt
@@ -348,7 +347,7 @@ def telnet_attempt(DeviceName):
 		#Waiting to be asked for a password
 		router_output = connection.read_until("Password:", reading_timeout)
 		#Enter the password when asked and a "\n" for Enter
-		connection.write(localpassword + "\n")
+		connection.write("{}\n".format(localpassword))
 		time.sleep(30)
 		#Entering global config mode
 		connection.write("end\n")
@@ -357,13 +356,13 @@ def telnet_attempt(DeviceName):
 		time.sleep(1)
 		connection.write("interface Gig2\n")
 		time.sleep(1)
-		connection.write("ip address %s 255.255.255.224\n" % device_ip)
+		connection.write("ip address {} 255.255.255.224\n".format(device_ip))
 		connection.write("no shutdown\n")
 		time.sleep(1)
 		connection.write("interface Gig2\n")
 		connection.write("no shutdown\n")
 		time.sleep(5)
-		print '[+]In-band interface configuration successful for device %s. Trying SSH connection again.' % DeviceName
+		print '[+]In-band interface configuration successful for device {}. Trying SSH connection again.'.format(DeviceName)
 		connection.close()
 		time.sleep(20)
 	except:
@@ -371,6 +370,7 @@ def telnet_attempt(DeviceName):
 		unsuccessful_connections.append(DeviceName)
 
 def reinitialize_basehardening():
+	from napalm import get_network_driver
 	while True:
 		localorradius = raw_input("[?] Are you currently using RADIUS or local credentials? [local/radius]\n")
 		if localorradius == 'local':
@@ -456,8 +456,8 @@ def scenario_configuration():
 			device = 'cisco_ios'
 			for DeviceName in Devices:
 				device_ip = Devices[DeviceName]['mgmt_ip']
-				selected_cmd_file = open('%s.txt' % DeviceName, 'r')
-				print "[+] Pushing scenario configuration for device %s." % DeviceName
+				selected_cmd_file = open('{}.txt'.format(DeviceName), 'r')
+				print "[+] Pushing scenario configuration for device {}.".format(DeviceName)
 				command_set = []
 				selected_cmd_file.seek(0)
 				for each_line in selected_cmd_file.readlines():
@@ -468,7 +468,7 @@ def scenario_configuration():
 					net_connect.disconnect()
 				except netmiko.ssh_exception.NetMikoTimeoutException:
 					pass
-				print "[+] Scenario configuration of device %s successful.\n" % DeviceName
+				print "[+] Scenario configuration of device {} successful.\n".format(DeviceName)
 				selected_cmd_file.close()
 		break
 def get_the_facts():
@@ -530,12 +530,21 @@ def main_menu_selection():
 			!# Format:                                                         !#
 			!#                                                                 !#
 			!# LINE 1: [backupserver ip]                                       !#
+			!#                                                                 !#
 			!# 3) device-vars.yml - Used to include host variables as          !#
 			!#    as additional variables for configuration templating         !#
-			!#    functions.                                                   !#
-			!#                                                                 !#                  
+			!#    functions.                                            	   !#
+			!#                                                                 !#
+			!# Format:                                                         !#
+			!#                                                                 !#
+			!# Devices:                                                        !#
+			!#   [hostname1]:                                                  !#
+			!#     mgmt_ip: [mgmt_ip]                                          !#
+			!#     serial_ip: [serial_ip] (OPTIONAL)                           !#
+			!#     serial_port: [serial_port] (OPTIONAL)                       !#
+			!#                                                                 !#
 			!#*****************************************************************!#
-		""")
+		  """)
 		in_place = query_yes_no("Do you already have the files in place?")
 		if in_place == True:
 			pass
@@ -555,14 +564,14 @@ def main_menu_selection():
 		while True:
 			options=main_menu.keys()
 			options.sort(key=int)
-			print("!#" + "*" * 95 + "!#")
-			print("!#" + " " * 95 + "!#")
+			print("!#{}!#".format("*" * 95))
+			print("!#{}!#".format(" " * 95))
 			menu_num = 1
 			for entry in options:
-				print '!# ' + '[+]' + entry, main_menu[entry] + " " * (90 - len(main_menu[entry]) - len(str(menu_num))) + "!#"
+				print("!# [+]{} {}{}!#".format(entry, main_menu[entry], " " * (90 - len(main_menu[entry]) - len(str(menu_num)))))
 				menu_num += 1
-			print("!#" + " " * 95 + "!#")
-			print("!#" + "*" * 95 + "!#")
+			print("!#{}!#".format(" " * 95))
+			print("!#{}!#".format("*" * 95))
 			print("")
 			selection=raw_input("[*] Please select the option you'd like to run:\n")
 			if selection == '1':
