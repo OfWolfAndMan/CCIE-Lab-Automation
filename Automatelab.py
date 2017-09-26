@@ -1,7 +1,7 @@
 '''
-Modified September 24, 2017
+Modified September 26, 2017
 
-Version: 1.3
+Version: 1.4
 
 @author: OfWolfAndMan
 '''
@@ -18,15 +18,10 @@ import netmiko
 from netmiko import ConnectHandler
 from tqdm import tqdm
 from napalm import get_network_driver
+import yaml
 
-Devices = {'SW4': ['192.168.10.105'], 'IOSV1': ['10.51.60.36', '192.168.10.120', '2001'],
-		   'IOSV2': ['10.51.60.37', '192.168.10.120', '2002'], 'IOSV3': ['10.51.60.38', '192.168.10.120', '2003'],
-		   'IOSV4': ['10.51.60.39', '192.168.10.120', '2004'], 'IOSV5': ['10.51.60.40', '192.168.10.120', '2005'],
-		   'IOSV6': ['10.51.60.41', '192.168.10.120', '2006'], 'IOSV7': ['10.51.60.42', '192.168.10.120', '2007'],
-		   'IOSV8': ['10.51.60.43', '192.168.10.120', '2008'], 'IOSV9': ['10.51.60.44', '192.168.10.120', '2009'],
-		   'IOSV10': ['10.51.60.45', '192.168.10.120', '2010'], 'SW1': ['192.168.10.102'],
-		   'SW2': ['192.168.10.103'], 'SW3': ['192.168.10.104']
-		   }
+stream = file('device-vars.yml', 'r')
+Devices = (yaml.load(stream))['Devices']
 
 def call_variables():
 	path = '/root/scripts/CCIE_Automation/'
@@ -122,7 +117,7 @@ def exclude_devices():
 	print "What devices would you like to exclude? Please choose a device based on its hostname\n"
 	DeviceNames = []
 	for DeviceName in Devices:
-		print "{+} ", DeviceName, "- ",	 Devices[DeviceName][0]
+		print "{+} ", DeviceName, "- ",	 Devices[DeviceName]['mgmt_ip']
 		DeviceNames.append(DeviceName)
 	print "[+] To finish your selections, type in 'done' when you are complete."
 	while True:
@@ -155,7 +150,7 @@ def default_configurations():
 	device = 'cisco_ios'
 	print "[+] Initiating startup configuration wipe of all applicable devices\n"
 	for DeviceName in Devices:
-		device_ip = Devices[DeviceName][0]
+		device_ip = Devices[DeviceName]['mgmt_ip']
 		try:
 			net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
 			output = net_connect.send_command_expect("\nend\nwrite memory\nwrite erase\n\nreload\n\n")
@@ -177,7 +172,7 @@ def ip_reachability_group():
 		print "\n[+] Progress:\n"
 		pbar = tqdm(total=100)
 		for DeviceName in Devices:
-			device_ip = Devices[DeviceName][0]
+			device_ip = Devices[DeviceName]['mgmt_ip']
 			""".rstrip is needed for the ip as .readline adds a \n to
 			the lines' text"""
 			if "Linux" in platform.system():
@@ -214,13 +209,13 @@ def ip_reachability_group():
 		print "[+] Devices removed for the remainder of your tasks."
 		print "[+] Devices remaining:"
 		for DeviceName in Devices:
-			print "{+}", DeviceName,"- ", Devices[DeviceName][0]
+			print "{+}", DeviceName,"- ", Devices[DeviceName]['mgmt_ip']
 
 def get_bgp_asn():
 	device = 'cisco_ios'
 	for DeviceName in Devices:
 		if "CSR1000V" in DeviceName:
-			device_ip = Devices[DeviceName][0]
+			device_ip = Devices[DeviceName]['mgmt_ip']
 			net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
 			output = net_connect.send_command("show run | inc router bgp\n")
 			if "bgp" in output:
@@ -242,7 +237,7 @@ def backup_config():
 	global DeviceName
 	for DeviceName in Devices:
 		global device_ip
-		device_ip = Devices[DeviceName][0]
+		device_ip = Devices[DeviceName]['mgmt_ip']
 		device = 'cisco_ios'
 		try:
 			net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
@@ -265,10 +260,10 @@ def backup_config():
 
 def telnet_initial(domainname, localusername, localpassword, DeviceName):
 	try:
-		device_ip = Devices[DeviceName][0]
+		device_ip = Devices[DeviceName]['mgmt_ip']
 		print "[+] Attempting Out-of-Band IP configuration of device %s..." % DeviceName
-		serialip = Devices[DeviceName][1]
-		port = Devices[DeviceName][2]
+		serialip = Devices[DeviceName]['serial_ip']
+		port = Devices[DeviceName]['serial_port']
 		#Specify the connection timeout in seconds for blocking operations, like the connection attempt
 		connection_timeout = 5
 		reading_timeout = 5
@@ -336,8 +331,8 @@ def telnet_attempt():
 		print "[+] Attempting Out-of-Band IP configuration of device..."
 		#Define telnet parameters
 		#Specify the Telnet port (default is 23, anyway)
-		serialip = Devices[DeviceName][1]
-		port = Devices[DeviceName][2]
+		serialip = Devices[DeviceName]['serial_ip']
+		port = Devices[DeviceName]['serial_port']
 		#Specify the connection timeout in seconds for blocking operations, like the connection attempt
 		connection_timeout = 5
 		#Specify a timeout in seconds. Read until the string is found or until the timout has passed
@@ -377,7 +372,6 @@ def telnet_attempt():
 		unsuccessful_connections.append(DeviceName)
 
 def reinitialize_basehardening():
-	device = 'cisco_ios'
 	while True:
 		localorradius = raw_input("[?] Are you currently using RADIUS or local credentials? [local/radius]\n")
 		if localorradius == 'local':
@@ -396,7 +390,7 @@ def reinitialize_basehardening():
 	pbar = tqdm(total=100)
         driver = get_network_driver('ios')
 	for DeviceName in Devices:
-		device_ip = Devices[DeviceName][0]
+		device_ip = Devices[DeviceName]['mgmt_ip']
 		optional_args = {'global_delay_factor': 3}
 		device = driver(device_ip, username, password, optional_args=optional_args)
 		device.open()
@@ -462,7 +456,7 @@ def scenario_configuration():
 					final_path = os.chdir(initial_config_folder)
 			device = 'cisco_ios'
 			for DeviceName in Devices:
-				device_ip = Devices[DeviceName][0]
+				device_ip = Devices[DeviceName]['mgmt_ip']
 				selected_cmd_file = open('%s.txt' % DeviceName, 'r')
 				print "[+] Pushing scenario configuration for device %s." % DeviceName
 				command_set = []
@@ -478,6 +472,33 @@ def scenario_configuration():
 				print "[+] Scenario configuration of device %s successful.\n" % DeviceName
 				selected_cmd_file.close()
 		break
+def get_the_facts():
+	while True:
+		localorradius = raw_input("[?] Are you currently using RADIUS or local credentials? [local/radius]\n")
+		if localorradius == 'local':
+			username = localusername
+			password = localpassword
+			break
+		elif localorradius == 'radius':
+			username = radiususer
+			password = radiuspass
+			break
+		else:
+			print "[!] Invalid input. Please try again.\n"
+			continue
+	driver = get_network_driver('ios')
+	fact_list = {}
+	for DeviceName in Devices:
+		device_ip = Devices[DeviceName]['mgmt_ip']
+		optional_args = {'global_delay_factor': 3}
+		device = driver(device_ip, username, password, optional_args=optional_args)
+		device.open()
+		facts = device.get_facts()
+		device.close()
+		fact_list[DeviceName]=facts
+	print("[+] Done gathering all teh facts! See below.")
+	for key, value in fact_list.iteritems():
+		print(key + ": " + value)
 
 
 def main_menu_selection():
@@ -492,9 +513,9 @@ def main_menu_selection():
 			!# name EXACTLY as requested.                                      !#
 			!#                                                                 !#
 			!# 1) userlist.txt - Includes your username and password, both     !#
-			!# local as well as RADIUS user password (This script is written   !#
-			!# for RADIUS using the FreeRADIUS server only. TACACS+ not        !#
-			!# included.                                                       !#  
+			!#    local as well as RADIUS user password (This script is        !#
+			!#    written or RADIUS using the FreeRADIUS server only.          !# 
+			!#    TACACS+ not   included.                                      !#  
 			!#                                                                 !#
 			!# Format (Must match exactly):                                    !#
 			!#                                                                 !#
@@ -510,6 +531,10 @@ def main_menu_selection():
 			!# Format:                                                         !#
 			!#                                                                 !#
 			!# LINE 1: [backupserver ip]                                       !#
+			!# 3) device-vars.yml - Used to include host variables as          !#
+			!#    as additional variables for configuration templating         !#
+			!#    functions.                                                   !#
+			!#                                                                 !#                  
 			!#*****************************************************************!#
 		""")
 		in_place = query_yes_no("Do you already have the files in place?")
@@ -553,8 +578,8 @@ def main_menu_selection():
 			elif selection == '4':
 				device = 'cisco_ios'
 				pbar = tqdm(total=100)
-				for DeviceName in Device:
-					device_ip = Devices[DeviceName][0]
+				for DeviceName in Devices:
+					device_ip = Devices[DeviceName]['mgmt_ip']
 					print("\n[+] Progress:\n")
 					install_premium_license(device_ip, device, DeviceName)
 				pbar.close()
@@ -590,8 +615,7 @@ def main_menu_selection():
 					exclude_devices()
 				default_configurations()
 			elif selection == '9':
-				print("This option is under construction.\n")
-				continue
+				get_the_facts()
 			elif selection == '10':
 				print("Bye")
 				break

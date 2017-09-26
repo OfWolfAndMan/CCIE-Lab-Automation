@@ -1,5 +1,5 @@
 # CCIE-Lab-Automation
-## Version 1.3
+## Version 1.4
 
 Use this script to automate a CSR1000V deployment, primarily within a CCIE lab environment.
 
@@ -38,6 +38,8 @@ Built in python 2.7. The following are a few features currently available with t
 - NAPALM used for configure replace operation as the standard netmiko operation was buggy
 
 - Configurations updated to address issues with configure replace compatibility
+
+- Moved device variables into a YAML file and added capability to convert to dictionary
 
 **(Potential) Future Development:**
 
