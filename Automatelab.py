@@ -1,7 +1,7 @@
 '''
-Modified September 26, 2017
+Modified September 27, 2017
 
-Version: 1.5
+Version: 1.6
 
 @author: OfWolfAndMan
 '''
@@ -21,8 +21,8 @@ import yaml
 
 
 def call_variables():
-	path = '/root/scripts/CCIE_Automation/'
-	os.chdir(path)
+	#path = '/root/scripts/CCIE_Automation/'
+	#os.chdir(path)
 
 	global localusername, localpassword, radiususer, radiuspass, scpuser, scppass, scpip
 	variables = []
@@ -464,6 +464,23 @@ def scenario_configuration():
 				print "[+] Scenario configuration of device {} successful.\n".format(DeviceName)
 				selected_cmd_file.close()
 		break
+def render_templates():
+	from jinja2 import Environment, FileSystemLoader, Template
+	ENV = Environment(loader=FileSystemLoader('./'))
+
+	with open("device-vars.yml") as main_variables:
+		main_variables = yaml.load(main_variables)
+	with open("device-vars.yml") as main_variables_two:
+	    Devices = (yaml.load(main_variables_two))['Devices']
+	template = ENV.get_template("Baseline&Hardening_Configurations/Templates/Base&Hardening.template")
+	for DeviceName in Devices:
+		if "IOSV" in DeviceName:
+			with open("Baseline&Hardening_Configurations/Builds/{}.cfg".format(DeviceName), 'w') as config_output:
+				config_template = template.render(main_variables, hostname=DeviceName, mgmt_ip=Devices[DeviceName]['mgmt_ip'], mgmt_mask=Devices[DeviceName]['mgmt_mask'])
+				config_output.write(config_template)
+			config_output.close()
+		else:
+			pass
 def get_the_facts():
 	while True:
 		localorradius = raw_input("[?] Are you currently using RADIUS or local credentials? [local/radius]\n")
@@ -571,6 +588,13 @@ def main_menu_selection():
 				create_threads(domainname, localusername, localpassword)
 			elif selection == '2':
 				choose_scenario_type()
+				templates_created = query_yes_no("[?] Have the templates already been created?")
+				if templates_created == False:
+					print("[!] Rendering templates...")
+					render_templates()
+					print("[+] Done.")
+				else:
+					pass
 				print("[+] Applying templates...")
 				reinitialize_basehardening()
 			elif selection == '3':
