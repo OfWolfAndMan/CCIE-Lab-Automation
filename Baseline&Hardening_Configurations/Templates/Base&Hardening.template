@@ -1,0 +1,122 @@
+!
+version 15.5
+!
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service password-encryption
+!
+hostname {{ hostname }}
+!
+no logging console
+!
+aaa new-model
+aaa session-id common
+!
+aaa authentication attempts login 4
+aaa authentication login default group {{ nms.aaa.protocol }} local
+aaa authentication enable default group {{ nms.aaa.protocol }} enable
+aaa authorization exec default group {{ nms.aaa.protocol }} local
+aaa accounting exec default start-stop group {{ nms.aaa.protocol }}
+!
+ip domain-name {{ domain.name }}
+ip domain-lookup
+{% for server in domain.servers -%}
+ip name-server {{ server }}
+{% endfor -%}
+!
+username {{ aaa.localuser }} privilege 15 secret {{ aaa.localpassword }}
+!
+enable secret {{ aaa.secret }}
+!
+crypto key generate rsa general-keys modulus 2048
+!
+archive
+ path flash:archive
+ write-memory
+!
+ip tcp synwait-time 10
+ip ssh time-out 60
+ip ssh authentication-retries 3
+ip ssh source GigabitEthernet0/1
+ip ssh version 2
+ip scp server enable
+!
+ip radius source-interface GigabitEthernet0/1
+no ip http server
+no ip http secure-server
+redundancy
+no ipv6 cef
+!
+interface GigabitEthernet0/0
+ description <===Virtual Network Connection===>
+ no ip proxy-arp
+ no ip unreachables
+ no ip redirects
+ no shutdown
+!
+interface GigabitEthernet0/1
+ description <===Connection to Lab Full Mesh===>
+ ip address {{ mgmt_ip }} {{ mgmt_mask }}
+ no shutdown
+ no ip proxy-arp
+ no ip unreachables
+ no ip redirects
+ no snmp trap link-status
+!
+interface GigabitEthernet0/2
+ description <===UNUSED===>
+ no ip proxy-arp
+ no ip unreachables
+ no ip redirects
+ no snmp trap link-status
+!
+ip access-list standard SSH_ACCESS
+ remark JumpBox_VM Access
+ permit 10.1.1.5 log
+ remark Rpi3 Access
+ permit 192.168.1.15 log
+ remark Trusted_Users Access
+ permit 192.168.100.0 0.0.0.255 log
+ permit 172.17.1.0 0.0.0.255 log
+!
+ip route 0.0.0.0 0.0.0.0 10.51.60.33 2
+!
+{% if nms.aaa.protocol == "radius" -%}
+radius server {{ nms.aaa.instance_name }}
+ address ipv4 {{ nms.aaa.server_ip }} auth-port 1812 acct-port 1813
+ key 7 {{ nms.aaa.key }}
+{% elif nms.aaa.protocol == "tacacs" -%}
+tacacs server {{ nms.aaa.instance_name }}
+ address ipv4 {{ nms.aaa.server_ip }}
+ key 7 {{ nms.aaa.key }}
+{% endif -%}
+!
+alias exec sr show run
+alias exec siib show ip int brief
+alias exec scn show cdp neighbors
+!
+line con 0
+ exec-timeout 5 0
+ privilege level 15
+line aux 0
+ no exec
+ transport input none
+line vty 0 4
+ access-class SSH_ACCESS in
+ exec-timeout 10
+ privilege level 15
+ transport input ssh
+line vty 5 15
+ no exec
+ transport input none
+!
+ntp source GigabitEthernet0/1
+{% for server in nms.ntp -%}
+ntp server {{ server }}
+{% endfor -%}
+!
+end
+!
+write memory
+
