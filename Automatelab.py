@@ -95,7 +95,7 @@ def install_premium_license(device_ip, device, DeviceName):
 		output = net_connect.send_command("\nconfigure terminal\nlicense boot level premium\nyes\nend\nwrite\nreload\n")
 		net_connect.disconnect()
 	except netmiko.ssh_exception.NetMikoTimeoutException:
-		print "[!] Could not connect to device %s. Skipping..." % DeviceName
+		print("[!] Could not connect to device {}. Skipping...".format(DeviceName))
 		pass
 	except EOFError:
 		pass
@@ -111,25 +111,25 @@ def backup_config_single(device_ip, device, DeviceName):
 		unsuccessful_connections.append(DeviceName)
 
 def exclude_devices():
-	print "What devices would you like to exclude? Please choose a device based on its hostname\n"
+	print("What devices would you like to exclude? Please choose a device based on its hostname\n")
 	DeviceNames = []
 	for DeviceName in Devices:
-		print "[+] ", DeviceName, "- ",	 Devices[DeviceName]['mgmt_ip']
+		print("[+] {} - {}".format(DeviceName, Devices[DeviceName]['mgmt_ip']))
 		DeviceNames.append(DeviceName)
-	print "[+] To finish your selections, type in 'done' when you are complete."
+	print("[+] To finish your selections, type in 'done' when you are complete.")
 	while True:
 		try:
 			exclude_device = raw_input()
 			if exclude_device == "done":
 				break
 			elif exclude_device not in DeviceNames:
-				print "[!] Invalid entry. Please make sure you are entering a valid hostname."
+				print("[!] Invalid entry. Please make sure you are entering a valid hostname.")
 				continue
 			else:
 				del Devices[exclude_device]
-				print "[+] Excluded device {} from task.".format(exclude_device)
+				print("[+] Excluded device {} from task.".format(exclude_device))
 		except KeyError:
-			print "[!] That device has already been excluded."
+			print("[!] That device has already been excluded.")
 			continue
 
 def create_threads(domainname, localuser, localpass):
@@ -145,28 +145,28 @@ def create_threads(domainname, localuser, localpass):
 
 def default_configurations():
 	device = 'cisco_ios'
-	print "[+] Initiating startup configuration wipe of all applicable devices\n"
+	print("[+] Initiating startup configuration wipe of all applicable devices\n")
 	for DeviceName in Devices:
 		device_ip = Devices[DeviceName]['mgmt_ip']
 		try:
 			net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
 			output = net_connect.send_command_expect("\nend\nwrite memory\nwrite erase\n\nreload\n\n")
 			net_connect.disconnect()
-			print "[+] Configuration wiped successfully for device {}".format(DeviceName)
+			print("[+] Configuration wiped successfully for device {}".format(DeviceName))
 			time.sleep(5)
 		except netmiko.ssh_exception.NetMikoTimeoutException:
-			print "[!] Could not connect to device {}. Skipping...".format(DeviceName)
+			print("[!] Could not connect to device {}. Skipping...".format(DeviceName))
 			continue
 		except:
 			pass
 
 def ip_reachability_group():
-	print "\n[+] Checking IP reachability. Please wait..."
+	print("\n[+] Checking IP reachability. Please wait...")
 	pingable_devices = {}
 	global unpingable_devices
 	unpingable_devices = {}
 	with open(os.devnull, "wb") as limbo:
-		print "\n[+] Progress:\n"
+		print("\n[+] Progress:\n")
 		pbar = tqdm(total=100)
 		for DeviceName in Devices:
 			device_ip = Devices[DeviceName]['mgmt_ip']
@@ -214,18 +214,18 @@ def get_bgp_asn():
 				newoutput = output.replace("router bgp ", "")
 			else:
 				newoutput = "N/A"
-			print "ASN for device {}: {}".format(DeviceName, newoutput)
+			print("ASN for device {}: {}".format(DeviceName, newoutput))
 			net_connect.disconnect()
 		else:
 			pass
-	print "Done"
+	print("Done")
 
 def backup_config():
 	global unsuccessful_connections
 	unsuccessful_connections = []
 	global successful_connections
 	successful_connections = []
-	print "[+] Initiating device backup procedure."
+	print("[+] Initiating device backup procedure.")
 	for DeviceName in Devices:
 		global device_ip
 		device_ip = Devices[DeviceName]['mgmt_ip']
@@ -236,7 +236,7 @@ def backup_config():
 			net_connect.disconnect()
 			successful_connections.append(DeviceName)
 		except:
-			print '[+] Could not SSH to device {}. Trying serial connection...'.format(DeviceName)
+			print("[+] Could not SSH to device {}. Trying serial connection...".format(DeviceName))
 			telnet_attempt(DeviceName)
 			backup_config_single(device_ip, device, DeviceName)
 	print("")
@@ -252,7 +252,7 @@ def backup_config():
 def telnet_initial(domainname, localusername, localpassword, DeviceName):
 	try:
 		device_ip = Devices[DeviceName]['mgmt_ip']
-		print "[+] Attempting Out-of-Band IP configuration of device {}...".format(DeviceName)
+		print("[+] Attempting Out-of-Band IP configuration of device {}...".format(DeviceName))
 		serialip = Devices[DeviceName]['serial_ip']
 		port = Devices[DeviceName]['serial_port']
 		#Specify the connection timeout in seconds for blocking operations, like the connection attempt
@@ -306,20 +306,20 @@ def telnet_initial(domainname, localusername, localpassword, DeviceName):
 		connection.write("end\r\n")
 		connection.write("write memory\r\n")
 		time.sleep(2)
-		print "[+]Resolving ARP entry for device %s." % DeviceName
+		print("[+]Resolving ARP entry for device %s." % DeviceName)
 		connection.write("ping 208.67.222.222\n")
 		time.sleep(3)
-		print '[+]In-band interface configuration successful for device %s.' % DeviceName
+		print("[+]In-band interface configuration successful for device %s." % DeviceName)
 		connection.read_very_eager()
 		connection.close()
 		time.sleep(5)
 	except:
-		print "[!] Serial over telnet attempt failed for device %s." % DeviceName
+		print("[!] Serial over telnet attempt failed for device %s." % DeviceName)
 
 
 def telnet_attempt(DeviceName):
 	try:
-		print "[+] Attempting Out-of-Band IP configuration of device..."
+		print("[+] Attempting Out-of-Band IP configuration of device...")
 		#Define telnet parameters
 		#Specify the Telnet port (default is 23, anyway)
 		serialip = Devices[DeviceName]['serial_ip']
@@ -355,11 +355,11 @@ def telnet_attempt(DeviceName):
 		connection.write("interface Gig2\n")
 		connection.write("no shutdown\n")
 		time.sleep(5)
-		print '[+]In-band interface configuration successful for device {}. Trying SSH connection again.'.format(DeviceName)
+		print("[+]In-band interface configuration successful for device {}. Trying SSH connection again.".format(DeviceName))
 		connection.close()
 		time.sleep(20)
 	except:
-		print "[!] Serial over telnet attempt failed for device {}.".format(DeviceName)
+		print("[!] Serial over telnet attempt failed for device {}.".format(DeviceName))
 		unsuccessful_connections.append(DeviceName)
 
 def reinitialize_basehardening():
@@ -375,12 +375,12 @@ def reinitialize_basehardening():
 			password = radiuspass
 			break
 		else:
-			print "[!] Invalid input. Please try again.\n"
+			print("[!] Invalid input. Please try again.\n")
 			continue
-	print "[+] Copying baseline and hardening scripts to devices.\n"
-	print "\n[+] Progress\n"
+	print("[+] Copying baseline and hardening scripts to devices.\n")
+	print("\n[+] Progress\n")
 	pbar = tqdm(total=100)
-        driver = get_network_driver('ios')
+	driver = get_network_driver('ios')
 	for DeviceName in Devices:
 		device_ip = Devices[DeviceName]['mgmt_ip']
 		optional_args = {'global_delay_factor': 3}
@@ -391,7 +391,7 @@ def reinitialize_basehardening():
 		device.close()
 		pbar.update(100/len(Devices))
 	pbar.close()
-	print "[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n"
+	print("[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n")
 def choose_scenario_type():
 	while True:
 		RandS = raw_input('[?] Are these configurations for a switching lab, a routing lab, or both? Choose one of the three options: [sw/rt/both]')
@@ -420,14 +420,14 @@ def choose_scenario_type():
 		elif RandS == 'both':
 			break
 		else:
-			print "[!] Invalid input. Please try again!\n"
+			print("[!] Invalid input. Please try again!\n")
 			continue
 def scenario_configuration():
 #Purpose: Deploys a scenario configuration for a lab workbook. Currently, only INE's lab workbook is applicable,
 #but this may change in the future.
 	path = '/root/scripts/CCIE_Automation/Scenario_Configurations/ine.ccie.rsv5.workbook.initial.configs/advanced.technology.labs'
 	os.chdir(path)
-	print "[+] Which Baseline Configs would you like to implement?\n"
+	print("[+] Which Baseline Configs would you like to implement?\n")
 	dir_output = []
 	for dir in enumerate(os.listdir('.'), start = 1):
 		#print "[+] %d %s" % (ij, dir)
@@ -435,11 +435,11 @@ def scenario_configuration():
 		#dir_output[ij] = dir
 	#Using the below, I was able to print the options in three columns
 	for a,b,c in zip(dir_output[::3],dir_output[1::3],dir_output[2::3]):
-		print '{:<50}{:<43}{:<}'.format(a,b,c)
+		print("{:<50}{:<43}{:<}".format(a,b,c))
 	while True:
 		option = raw_input("[+] Choose an option by integer.\n")
 		if int(option) > len(dir_output):
-			print "[!] You chose an incorrect value. Try again.\n"
+			print("[!] You chose an incorrect value. Try again.\n")
 			continue
 		else:
 			for x,y in dir_output:
@@ -450,7 +450,7 @@ def scenario_configuration():
 			for DeviceName in Devices:
 				device_ip = Devices[DeviceName]['mgmt_ip']
 				selected_cmd_file = open('{}.txt'.format(DeviceName), 'r')
-				print "[+] Pushing scenario configuration for device {}.".format(DeviceName)
+				print("[+] Pushing scenario configuration for device {}.".format(DeviceName))
 				command_set = []
 				selected_cmd_file.seek(0)
 				for each_line in selected_cmd_file.readlines():
@@ -461,7 +461,7 @@ def scenario_configuration():
 					net_connect.disconnect()
 				except netmiko.ssh_exception.NetMikoTimeoutException:
 					pass
-				print "[+] Scenario configuration of device {} successful.\n".format(DeviceName)
+				print("[+] Scenario configuration of device {} successful.\n".format(DeviceName))
 				selected_cmd_file.close()
 		break
 def render_templates():
@@ -493,7 +493,7 @@ def get_the_facts():
 			password = radiuspass
 			break
 		else:
-			print "[!] Invalid input. Please try again.\n"
+			print("[!] Invalid input. Please try again.\n")
 			continue
 	driver = get_network_driver('ios')
 	fact_list = {}
@@ -648,7 +648,7 @@ def main_menu_selection():
 if __name__ == "__main__":
 	stream = file('device-vars.yml', 'r')
 	Devices = (yaml.load(stream))['Devices']
-	print "[!] Need to check IP reachability and removable any unreachable devices first. Please wait..."
+	print("[!] Need to check IP reachability and removable any unreachable devices first. Please wait...")
 	ip_reachability_group()
 	in_place = query_yes_no("\nDevices that are reachable are listed above. Proceed?")
 	if in_place == True:
