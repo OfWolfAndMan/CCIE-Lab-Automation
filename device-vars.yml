@@ -1,44 +1,56 @@
+---
+
 Devices:
     IOSV1:
       mgmt_ip: 10.51.60.36
       serial_ip: 192.168.10.120
       serial_port: 2001
+      mgmt_mask: 255.255.255.224
     IOSV2:
       mgmt_ip: 10.51.60.37
       serial_ip: 192.168.10.120
       serial_port: 2002
+      mgmt_mask: 255.255.255.224
     IOSV3:
       mgmt_ip: 10.51.60.38
       serial_ip: 192.168.10.120
       serial_port: 2003
+      mgmt_mask: 255.255.255.224
     IOSV4:
       mgmt_ip: 10.51.60.39
       serial_ip: 192.168.10.120
       serial_port: 2004
+      mgmt_mask: 255.255.255.224
     IOSV5:
       mgmt_ip: 10.51.60.40
       serial_ip: 192.168.10.120
       serial_port: 2005
+      mgmt_mask: 255.255.255.224
     IOSV6:
       mgmt_ip: 10.51.60.41
       serial_ip: 192.168.10.120
       serial_port: 2006
+      mgmt_mask: 255.255.255.224
     IOSV7:
       mgmt_ip: 10.51.60.42
       serial_ip: 192.168.10.120
       serial_port: 2007
+      mgmt_mask: 255.255.255.224
     IOSV8:
       mgmt_ip: 10.51.60.43
       serial_ip: 192.168.10.120
       serial_port: 2008
+      mgmt_mask: 255.255.255.224
     IOSV9:
       mgmt_ip: 10.51.60.44
       serial_ip: 192.168.10.120
       serial_port: 2009
+      mgmt_mask: 255.255.255.224
     IOSV10:
       mgmt_ip: 10.51.60.45
       serial_ip: 192.168.10.120
       serial_port: 2010
+      mgmt_mask: 255.255.255.224
     SW1:
       mgmt_ip: 192.168.10.102
     SW2:
@@ -47,3 +59,23 @@ Devices:
       mgmt_ip: 192.168.10.104
     SW4:
       mgmt_ip: 192.168.10.105
+
+domain:
+  name: thebigbadwolf.likes-pie.com
+  servers:
+    - 208.67.222.222
+    - 208.67.220.220
+nms:
+  ntp:
+    - time-c.nist.gov
+    - utcnist.colorado.edu
+  aaa:
+    instance_name: PI
+    protocol: radius
+    server_ip: 192.168.15.180
+    key: Radiuskey
+
+aaa:
+  localuser: therootbridge
+  localpassword: localpassword
+  secret: secretpassword
