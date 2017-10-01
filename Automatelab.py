@@ -394,7 +394,9 @@ def reinitialize_basehardening():
 	pbar.close()
 	print("[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n")
 	end_time = time.time()
-	print("[+] Time to complete task: {}".format(time_keeper(start_time, end_time)))
+	print("[+] Time to complete task:"
+	format(time_keeper(start_time, end_time)))
+	print("")
 def choose_scenario_type():
 	while True:
 		RandS = raw_input('[?] Are these configurations for a switching lab, a routing lab, or both? Choose one of the three options: [sw/rt/both]')
@@ -474,7 +476,9 @@ def scenario_configuration():
 				print("[+] Scenario configuration of device {} successful.\n".format(DeviceName))
 				selected_cmd_file.close()
 			end_time = time.time()
-			print("[+] Time to complete task: {}".format(time_keeper(start_time, end_time)))
+			print("[+] Time to complete task:"
+			format(time_keeper(start_time, end_time)))
+			print("")
 		break
 def render_templates():
 	from jinja2 import Environment, FileSystemLoader, Template
