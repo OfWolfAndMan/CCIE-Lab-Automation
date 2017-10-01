@@ -21,8 +21,8 @@ import yaml
 
 
 def call_variables():
-	#path = '/root/scripts/CCIE_Automation/'
-	#os.chdir(path)
+	path = '/root/scripts/CCIE_Automation/'
+	os.chdir(path)
 
 	global localusername, localpassword, radiususer, radiuspass, scpuser, scppass, scpip
 	variables = []
@@ -386,7 +386,7 @@ def reinitialize_basehardening():
 		optional_args = {'global_delay_factor': 3}
 		device = driver(device_ip, username, password, optional_args=optional_args)
 		device.open()
-		device.load_replace_candidate(filename='Baseline&Hardening_Configurations/Base&Hardening_{}.txt'.format(DeviceName))
+		device.load_replace_candidate(filename='Baseline&Hardening_Configurations/Builds/{}.txt'.format(DeviceName))
 		device.commit_config()
 		device.close()
 		pbar.update(100/len(Devices))
@@ -425,6 +425,7 @@ def choose_scenario_type():
 def scenario_configuration():
 #Purpose: Deploys a scenario configuration for a lab workbook. Currently, only INE's lab workbook is applicable,
 #but this may change in the future.
+	#sys.setdefaultencoding('utf-8')
 	path = '/root/scripts/CCIE_Automation/Scenario_Configurations/ine.ccie.rsv5.workbook.initial.configs/advanced.technology.labs'
 	os.chdir(path)
 	print("[+] Which Baseline Configs would you like to implement?\n")
@@ -447,14 +448,20 @@ def scenario_configuration():
 					initial_config_folder = y
 					final_path = os.chdir(initial_config_folder)
 			device = 'cisco_ios'
+			start_time = time.time()
 			for DeviceName in Devices:
 				device_ip = Devices[DeviceName]['mgmt_ip']
-				selected_cmd_file = open('{}.txt'.format(DeviceName), 'r')
+				selected_cmd_file = open('{}.txt'.format(DeviceName), 'rb')
 				print("[+] Pushing scenario configuration for device {}.".format(DeviceName))
 				command_set = []
 				selected_cmd_file.seek(0)
 				for each_line in selected_cmd_file.readlines():
-					command_set.append(each_line)
+					if '\r' not in each_line:
+    					each_line = each_line.strip('\n')
+    					each_line = ("{}\r\n".format(each_line))
+    					command_set.append(each_line)
+  					else:
+    					command_set.append(each_line)
 				try:
 					net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
 					output = net_connect.send_config_set(command_set)
@@ -463,6 +470,7 @@ def scenario_configuration():
 					pass
 				print("[+] Scenario configuration of device {} successful.\n".format(DeviceName))
 				selected_cmd_file.close()
+			print("[+] Time to complete task: {} seconds".format(time.time() - start_time))
 		break
 def render_templates():
 	from jinja2 import Environment, FileSystemLoader, Template
