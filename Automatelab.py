@@ -381,17 +381,20 @@ def reinitialize_basehardening():
 	print("\n[+] Progress\n")
 	pbar = tqdm(total=100)
 	driver = get_network_driver('ios')
+	start_time = time.time()
 	for DeviceName in Devices:
 		device_ip = Devices[DeviceName]['mgmt_ip']
 		optional_args = {'global_delay_factor': 3}
 		device = driver(device_ip, username, password, optional_args=optional_args)
 		device.open()
-		device.load_replace_candidate(filename='Baseline&Hardening_Configurations/Builds/{}.txt'.format(DeviceName))
+		device.load_replace_candidate(filename='Baseline&Hardening_Configurations/Builds/{}.cfg'.format(DeviceName))
 		device.commit_config()
 		device.close()
 		pbar.update(100/len(Devices))
 	pbar.close()
 	print("[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n")
+	end_time = time.time()
+	print("[+] Time to complete task: {}".format(time_keeper(start_time, end_time)))
 def choose_scenario_type():
 	while True:
 		RandS = raw_input('[?] Are these configurations for a switching lab, a routing lab, or both? Choose one of the three options: [sw/rt/both]')
@@ -470,7 +473,8 @@ def scenario_configuration():
 					pass
 				print("[+] Scenario configuration of device {} successful.\n".format(DeviceName))
 				selected_cmd_file.close()
-			print("[+] Time to complete task: {} seconds".format(time.time() - start_time))
+			end_time = time.time()
+			print("[+] Time to complete task: {}".format(time_keeper(start_time, end_time)))
 		break
 def render_templates():
 	from jinja2 import Environment, FileSystemLoader, Template
@@ -516,6 +520,11 @@ def get_the_facts():
 	print("[+] Done gathering all teh facts! See below.")
 	for key, value in fact_list.iteritems():
 		print(key + ": " + value)
+
+def time_keeper(start,end):
+	hours, rem = divmod(end-start, 3600)
+	minutes, seconds = divmod(rem, 60)
+	print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
 
 
 def main_menu_selection():
