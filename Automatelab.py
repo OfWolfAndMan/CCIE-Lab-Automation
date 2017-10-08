@@ -206,7 +206,7 @@ def ip_reachability_group():
 def get_bgp_asn():
 	device = 'cisco_ios'
 	for DeviceName in Devices:
-		if "CSR1000V" in DeviceName:
+		if "CSR1000V" in DeviceName or "IOSV" in DeviceName:
 			device_ip = Devices[DeviceName]['mgmt_ip']
 			net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
 			output = net_connect.send_command("show run | inc router bgp\n")
