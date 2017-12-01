@@ -76,7 +76,5 @@ Paths should be defined in the script to suit your needs. Things that may need t
 **Community Input**
 
 Any and all recommendations to make this script better are encouraged. If you're looking for a function to be added,
-
 please ask! I am looking to improve this more, and having more than one person involved would be great! PRs are encouraged
-
 as well, assuming they fit into the context.
