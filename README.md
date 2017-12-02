@@ -49,6 +49,8 @@ Built in python 2.7. The following are a few features currently available with t
 
 - Further use of the YAML data structure 
 
+- Multithreading abilities (Used to speed up the process of pulling data and pushing configurations)
+
 **Caveats:**
 
 Baseline script formatting must have the following requirements for configure replace to take it properly:
