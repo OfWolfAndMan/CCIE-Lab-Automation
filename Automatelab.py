@@ -1,7 +1,7 @@
 '''
-Modified September 27, 2017
+Modified December 3, 2017
 
-Version: 1.6
+Version: 1.7
 
 @author: OfWolfAndMan
 '''

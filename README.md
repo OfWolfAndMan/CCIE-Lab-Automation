@@ -1,5 +1,5 @@
 # CCIE-Lab-Automation
-## Version 1.6
+## Version 1.7
 
 Use this script to automate a CSR1000V deployment, primarily within a CCIE lab environment.
 
@@ -35,11 +35,7 @@ Built in python 2.7. The following are a few features currently available with t
 
 **New in this release:**
 
-- NAPALM used for configure replace operation as the standard netmiko operation was buggy
-
-- A Jinja templating feature was added using YAML data structure to accomodate for others using this script
-
-- IP Reachability test mandatory prior to running tasks; no longer a menu option.
+- Initial attempts at multithreading functions (First function being the one for pulling BGP ASNs)
 
 **(Potential) Future Development:**
 
@@ -49,7 +45,7 @@ Built in python 2.7. The following are a few features currently available with t
 
 - Further use of the YAML data structure 
 
-- Multithreading abilities (Used to speed up the process of pulling data and pushing configurations)
+- Multithreading abilities for additional functions (Used to speed up the process of pulling data and pushing configurations)
 
 **Caveats:**
 
