@@ -47,7 +47,7 @@ Built in python 2.7. The following are a few features currently available with t
 
 - Multithreading abilities for additional functions (Used to speed up the process of pulling data and pushing configurations)
 
--Consolidation of certain code to provide greater modularity
+- Consolidation of certain code to provide greater modularity
 
 **Caveats:**
 
