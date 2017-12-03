@@ -432,13 +432,13 @@ def scenario_configuration():
 	os.chdir(path)
 	print("[+] Which Baseline Configs would you like to implement?\n")
 	dir_output = []
-	for dir in enumerate(os.listdir('.'), start = 1):
+	for dir in enumerate(sorted(os.listdir('.')), start = 1):
 		#print "[+] %d %s" % (ij, dir)
 		dir_output.append(dir)
 		#dir_output[ij] = dir
 	#Using the below, I was able to print the options in three columns
 	for a,b,c in zip(dir_output[::3],dir_output[1::3],dir_output[2::3]):
-		print("{:<50}{:<43}{:<}".format(a,b,c))
+		print("{:<47}{:<55}{:25}".format(a,b,c))
 	while True:
 		option = raw_input("[+] Choose an option by integer.\n")
 		if int(option) > len(dir_output):
