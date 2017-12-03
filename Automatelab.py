@@ -18,6 +18,7 @@ import netmiko
 from netmiko import ConnectHandler
 from tqdm import tqdm
 import yaml
+from Queue import Queue
 
 
 def call_variables():
@@ -203,22 +204,19 @@ def ip_reachability_group():
 	for DeviceName in Devices:
 		print("| [+] {} - {}".format(DeviceName,Devices[DeviceName]['mgmt_ip']))
 	print("*" * 30)
-def get_bgp_asn():
+def get_bgp_asn(device_ip, DeviceName, output_q):
+	output_dict = {}
 	device = 'cisco_ios'
-	for DeviceName in Devices:
-		if "CSR1000V" in DeviceName or "IOSV" in DeviceName:
-			device_ip = Devices[DeviceName]['mgmt_ip']
-			net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
-			output = net_connect.send_command("show run | inc router bgp\n")
-			if "bgp" in output:
-				newoutput = output.replace("router bgp ", "")
-			else:
-				newoutput = "N/A"
-			print("ASN for device {}: {}".format(DeviceName, newoutput))
-			net_connect.disconnect()
-		else:
-			pass
-	print("Done")
+	net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
+	output = net_connect.send_command("show run | inc router bgp\n")
+	if "bgp" in output:
+		newoutput = output.replace("router bgp ", "")
+	else:
+		newoutput = "N/A"
+	output = "ASN for device {}: {}".format(DeviceName, newoutput)
+	net_connect.disconnect()
+	output_dict[DeviceName] = output
+	output_q.put(output_dict)
 
 def backup_config():
 	global unsuccessful_connections
@@ -394,8 +392,7 @@ def reinitialize_basehardening():
 	pbar.close()
 	print("[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n")
 	end_time = time.time()
-	print("[+] Time to complete task:"
-	format(time_keeper(start_time, end_time)))
+	print("[+] Time to complete task:{}".format(time_keeper(start_time, end_time)))
 	print("")
 def choose_scenario_type():
 	while True:
@@ -462,10 +459,10 @@ def scenario_configuration():
 				selected_cmd_file.seek(0)
 				for each_line in selected_cmd_file.readlines():
 					if '\r' not in each_line:
-    					each_line = each_line.strip('\n')
+						each_line = each_line.strip('\n')
     					each_line = ("{}\r\n".format(each_line))
     					command_set.append(each_line)
-  					else:
+    				else:
     					command_set.append(each_line)
 				try:
 					net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
@@ -476,8 +473,7 @@ def scenario_configuration():
 				print("[+] Scenario configuration of device {} successful.\n".format(DeviceName))
 				selected_cmd_file.close()
 			end_time = time.time()
-			print("[+] Time to complete task:"
-			format(time_keeper(start_time, end_time)))
+			print("[+] Time to complete task: {}".format(time_keeper(start_time, end_time)))
 			print("")
 		break
 def render_templates():
@@ -647,7 +643,29 @@ def main_menu_selection():
 				backup_config()
 			elif selection == '6':
 				print("Getting BGP ASNs for all routers...")
-				get_bgp_asn()
+				time_before = time.time()
+				output_q = Queue()
+				for DeviceName, value in Devices.items():
+					if value["device_type"] == "router":
+						device_ip = Devices[DeviceName]['mgmt_ip']
+						my_thread = threading.Thread(target=get_bgp_asn, args=(device_ip, DeviceName, output_q))
+						my_thread.start()
+	    			else:
+	    				pass
+	    		# Wait for all threads to complete
+				main_thread = threading.currentThread()
+				for some_thread in threading.enumerate():
+					if some_thread != main_thread:
+						some_thread.join()
+
+    			# Retrieve everything off the queue
+				while not output_q.empty():
+					my_dict = output_q.get()
+					for k, val in my_dict.iteritems():
+						print val
+				print("Done")
+				time_after = time.time()
+				print("Total time to completion: {} seconds".format(time_after - time_before))
 			elif selection == '7':
 				exclude = query_yes_no("[?] Would you like to exclude any devices from your config wipe?", default="n")
 				if exclude == False:

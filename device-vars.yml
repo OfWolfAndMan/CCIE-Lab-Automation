@@ -6,59 +6,73 @@ Devices:
       serial_ip: 192.168.10.120
       serial_port: 2001
       mgmt_mask: 255.255.255.224
+      device_type: router
     IOSV2:
       mgmt_ip: 10.51.60.37
       serial_ip: 192.168.10.120
       serial_port: 2002
       mgmt_mask: 255.255.255.224
+      device_type: router
     IOSV3:
       mgmt_ip: 10.51.60.38
       serial_ip: 192.168.10.120
       serial_port: 2003
       mgmt_mask: 255.255.255.224
+      device_type: router
     IOSV4:
       mgmt_ip: 10.51.60.39
       serial_ip: 192.168.10.120
       serial_port: 2004
       mgmt_mask: 255.255.255.224
+      device_type: router
     IOSV5:
       mgmt_ip: 10.51.60.40
       serial_ip: 192.168.10.120
       serial_port: 2005
       mgmt_mask: 255.255.255.224
+      device_type: router
     IOSV6:
       mgmt_ip: 10.51.60.41
       serial_ip: 192.168.10.120
       serial_port: 2006
       mgmt_mask: 255.255.255.224
+      device_type: router
     IOSV7:
       mgmt_ip: 10.51.60.42
       serial_ip: 192.168.10.120
       serial_port: 2007
       mgmt_mask: 255.255.255.224
+      device_type: router
     IOSV8:
       mgmt_ip: 10.51.60.43
       serial_ip: 192.168.10.120
       serial_port: 2008
       mgmt_mask: 255.255.255.224
+      device_type: router
     IOSV9:
       mgmt_ip: 10.51.60.44
       serial_ip: 192.168.10.120
       serial_port: 2009
       mgmt_mask: 255.255.255.224
+      device_type: router
     IOSV10:
       mgmt_ip: 10.51.60.45
       serial_ip: 192.168.10.120
       serial_port: 2010
       mgmt_mask: 255.255.255.224
+      device_type: router
     SW1:
       mgmt_ip: 192.168.10.102
+      device_type: switch
     SW2:
       mgmt_ip: 192.168.10.103
+      device_type: switch
     SW3:
       mgmt_ip: 192.168.10.104
+      device_type: switch
     SW4:
       mgmt_ip: 192.168.10.105
+      device_type: switch
 
 domain:
   name: thebigbadwolf.likes-pie.com
