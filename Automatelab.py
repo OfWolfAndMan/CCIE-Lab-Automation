@@ -450,7 +450,7 @@ def scenario_configuration_threading():
 					initial_config_folder = y
 					final_path = os.chdir(initial_config_folder)
 			time_before = time.time()
-			print("[+] Pushing scenario configuration for device to all devices.")
+			print("[+] Pushing scenario configurations to all devices.")
 			for DeviceName in Devices:
 				device_ip = Devices[DeviceName]['mgmt_ip']
 				my_thread = threading.Thread(target=scenario_configuration_install, args=(device_ip, DeviceName))
