@@ -1,7 +1,7 @@
 '''
 Modified December 3, 2017
 
-Version: 1.7
+Version: 1.8
 
 @author: OfWolfAndMan
 '''
@@ -424,7 +424,7 @@ def choose_scenario_type():
 		else:
 			print("[!] Invalid input. Please try again!\n")
 			continue
-def scenario_configuration():
+def scenario_configuration_threading():
 #Purpose: Deploys a scenario configuration for a lab workbook. Currently, only INE's lab workbook is applicable,
 #but this may change in the future.
 	#sys.setdefaultencoding('utf-8')
@@ -449,33 +449,42 @@ def scenario_configuration():
 				if x == int(option):
 					initial_config_folder = y
 					final_path = os.chdir(initial_config_folder)
-			device = 'cisco_ios'
-			start_time = time.time()
+			time_before = time.time()
+			print("[+] Pushing scenario configuration for device to all devices.")
 			for DeviceName in Devices:
 				device_ip = Devices[DeviceName]['mgmt_ip']
-				selected_cmd_file = open('{}.txt'.format(DeviceName), 'rb')
-				print("[+] Pushing scenario configuration for device {}.".format(DeviceName))
-				command_set = []
-				selected_cmd_file.seek(0)
-				for each_line in selected_cmd_file.readlines():
-					if '\r' not in each_line:
-						each_line = each_line.strip('\n')
-    					each_line = ("{}\r\n".format(each_line))
-    					command_set.append(each_line)
-    				else:
-    					command_set.append(each_line)
-				try:
-					net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
-					output = net_connect.send_config_set(command_set)
-					net_connect.disconnect()
-				except netmiko.ssh_exception.NetMikoTimeoutException:
-					pass
-				print("[+] Scenario configuration of device {} successful.\n".format(DeviceName))
-				selected_cmd_file.close()
-			end_time = time.time()
-			print("[+] Time to complete task: {}".format(time_keeper(start_time, end_time)))
+				my_thread = threading.Thread(target=scenario_configuration_install, args=(device_ip, DeviceName))
+				my_thread.start()
+	    		# Wait for all threads to complete
+			main_thread = threading.currentThread()
+			for some_thread in threading.enumerate():
+				if some_thread != main_thread:
+					some_thread.join()
+			time_after = time.time()
+			print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
 			print("")
 		break
+def scenario_configuration_install(device_ip, DeviceName):
+	selected_cmd_file = open('{}.txt'.format(DeviceName), 'rb')
+	command_set = []
+	selected_cmd_file.seek(0)
+	device = 'cisco_ios'
+	for each_line in selected_cmd_file.readlines():
+		if '\r' not in each_line:
+			each_line = each_line.strip('\n')
+			each_line = ("{}\r\n".format(each_line))
+			command_set.append(each_line)
+		else:
+			command_set.append(each_line)
+	try:
+		net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
+		output = net_connect.send_config_set(command_set)
+		net_connect.disconnect()
+	except netmiko.ssh_exception.NetMikoTimeoutException:
+		pass
+	print("[+] Scenario configuration of device {} successful.".format(DeviceName))
+	selected_cmd_file.close()
+
 def render_templates():
 	from jinja2 import Environment, FileSystemLoader, Template
 	ENV = Environment(loader=FileSystemLoader('./'))
@@ -629,7 +638,7 @@ def main_menu_selection():
 					pass
 				else:
 					exclude_devices()
-				scenario_configuration()
+				scenario_configuration_threading()
 			elif selection == '5':
 				"""The Linux SCP server used in this script is natively installed. One issue you 
 				may encounter is an issue with one of your switches or routers not having a cipher
@@ -642,7 +651,7 @@ def main_menu_selection():
 					exclude_devices()
 				backup_config()
 			elif selection == '6':
-				print("Getting BGP ASNs for all routers...")
+				print("[+] Getting BGP ASNs for all routers...")
 				time_before = time.time()
 				output_q = Queue()
 				for DeviceName, value in Devices.items():
@@ -663,9 +672,9 @@ def main_menu_selection():
 					my_dict = output_q.get()
 					for k, val in my_dict.iteritems():
 						print val
-				print("Done")
+				print("[+] Done")
 				time_after = time.time()
-				print("Total time to completion: {} seconds".format(time_after - time_before))
+				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
 			elif selection == '7':
 				exclude = query_yes_no("[?] Would you like to exclude any devices from your config wipe?", default="n")
 				if exclude == False:

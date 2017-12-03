@@ -1,5 +1,5 @@
 # CCIE-Lab-Automation
-## Version 1.7
+## Version 1.8
 
 Use this script to automate a CSR1000V deployment, primarily within a CCIE lab environment.
 
@@ -35,7 +35,7 @@ Built in python 2.7. The following are a few features currently available with t
 
 **New in this release:**
 
-- Initial attempts at multithreading functions (First function being the one for pulling BGP ASNs)
+- Initial attempts at multithreading functions (Currently supported for scenario configs and pulling BGP ASNs)
 
 **(Potential) Future Development:**
 
@@ -46,6 +46,8 @@ Built in python 2.7. The following are a few features currently available with t
 - Further use of the YAML data structure 
 
 - Multithreading abilities for additional functions (Used to speed up the process of pulling data and pushing configurations)
+
+-Consolidation of certain code to provide greater modularity
 
 **Caveats:**
 
