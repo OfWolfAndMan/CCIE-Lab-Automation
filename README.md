@@ -1,5 +1,5 @@
 # CCIE-Lab-Automation
-## Version 1.8
+## Version 1.9
 
 Use this script to automate a CSR1000V deployment, primarily within a CCIE lab environment.
 
@@ -37,13 +37,13 @@ Built in python 2.7. The following are a few features currently available with t
 
 - Initial attempts at multithreading functions (Currently supported for scenario configs and pulling BGP ASNs)
 
+- Text variable files have been eliminated. All variables now go into the "device-vars.yml" file
+
 **(Potential) Future Development:**
 
 - TextFSM integration for data parsing
 
 - Ansible integration for supplementary configuration management purposes
-
-- Further use of the YAML data structure 
 
 - Multithreading abilities for additional functions (Used to speed up the process of pulling data and pushing configurations)
 

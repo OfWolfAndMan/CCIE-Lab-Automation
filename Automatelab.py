@@ -1,7 +1,7 @@
 '''
-Modified December 3, 2017
+Modified December 4, 2017
 
-Version: 1.8
+Version: 1.9
 
 @author: OfWolfAndMan
 '''
@@ -21,30 +21,19 @@ import yaml
 from Queue import Queue
 
 
-def call_variables():
+def call_variables(stream):
 	path = '/root/scripts/CCIE_Automation/'
 	os.chdir(path)
 
 	global localusername, localpassword, radiususer, radiuspass, scpuser, scppass, scpip
-	variables = []
-	variable_file_one = open('userlist.txt', 'r')
-	variable_file_one.seek(0)
-	for eachline in variable_file_one.readlines():
-		variables.append(eachline.rstrip())
-	variable_file_one.close()
-	variable_file_two = open('netserver.txt', 'r')
-	variable_file_two.seek(0)
-	for eachline in variable_file_two.readlines():
-		variables.append(eachline.rstrip())
-	variable_file_two.close()
 
-	localusername = variables[0]
-	localpassword = variables[1]
-	radiususer = variables[2]
-	radiuspass = variables[3]
-	scpuser = variables[4]
-	scppass = variables[5]
-	scpip = variables[6]
+	localusername = stream['users']['localuser']['username']
+	localpassword = stream['users']['localuser']['password']
+	radiususer = stream['users']['radius']['username']
+	radiuspass = stream['users']['radius']['password']
+	scpuser = stream['users']['scp']['username']
+	scppass = stream['users']['scp']['password']
+	scpip = stream['nms']['scp']
 
 """Currently, this script is written for Cisco IOS. In the future, variants
 may be written for other vendors' equipment."""
@@ -695,7 +684,8 @@ def main_menu_selection():
 
 if __name__ == "__main__":
 	stream = file('device-vars.yml', 'r')
-	Devices = (yaml.load(stream))['Devices']
+	stream = yaml.load(stream)
+	Devices = stream['Devices']
 	print("[!] Need to check IP reachability and removable any unreachable devices first. Please wait...")
 	ip_reachability_group()
 	in_place = query_yes_no("\nDevices that are reachable are listed above. Proceed?")
@@ -703,5 +693,5 @@ if __name__ == "__main__":
 			pass
 	else:
 		sys.exit("Exiting!")
-	call_variables()
+	call_variables(stream)
 	main_menu_selection()
