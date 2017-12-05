@@ -53,7 +53,7 @@ Built in python 2.7. The following are a few features currently available with t
 
 - Consolidation of certain code to provide greater modularity
 
-**Caveats:**
+**Additional Details:**
 
 Baseline script formatting must have the following requirements for configure replace to take it properly:
 	
