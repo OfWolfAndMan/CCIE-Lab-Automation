@@ -1,19 +1,25 @@
 # CCIE-Lab-Automation
 ## Version 1.9
 
-Use this script to automate a CSR1000V deployment, primarily within a CCIE lab environment.
+Use this script to automate a CSR1000V/IOSv deployment, primarily within a CCIE lab environment.
 
 Built in python 2.7. The following are a few features currently available with this script:
-
-- Basic configuration and in-band IP setup
    
 - Baseline and hardening script configuration
 
 - Scenarios configuration per INE's CCIE topology (Will introduce Micronics' labs into the mix soon)
 
+- Pull BGP ASNs from all devices
+
 - Configuration backups to an SCP server (A Raspberry Pi was used for testing)
 
 - Install trial premium license for extra functionality i.e. Security and Data licenses (MPLS, IPSec)
+
+- Configure replace function 
+
+- Template rendering with Jinja2 prior to deployment
+
+- Have an idea? Pitch it! I want to hear it!
 
 **Prerequisites & Dependencies:**
 
@@ -22,8 +28,6 @@ Built in python 2.7. The following are a few features currently available with t
 * Required libraries
 
   + Netmiko
-	  
-  + All other libraries come with python 2.7 natively
 	   
   + TQDM (Used as a progress bar for tasks)
   
@@ -58,12 +62,12 @@ Baseline script formatting must have the following requirements for configure re
 - "end" command
 	
 - Subcommands, such as those under "interface Gigx/x", must have a space in them to display hierarchy. Otherwise those lines
-won't be added.
+  won't be added.
 
 - ALL whitespaces should be filled with "!". In addition, it is advised against using a configuration with a banner
   in it during configure replace operations
 
-Paths should be defined in the script to suit your needs. Things that may need to be changed in the script includes:
+Paths should be defined in the script to suit your needs. Things that will need to be defined in the YAML (Data structure for external variables) file include:
 	
 - SCP server IP
 	
@@ -73,8 +77,4 @@ Paths should be defined in the script to suit your needs. Things that may need t
 	
 - Path to your scenario/baseline/hardening configurations on the box running the script
 
-**Community Input**
-
-Any and all recommendations to make this script better are encouraged. If you're looking for a function to be added,
-please ask! I am looking to improve this more, and having more than one person involved would be great! PRs are encouraged
-as well, assuming they fit into the context.
+- Variables for the Jinja2 templates
