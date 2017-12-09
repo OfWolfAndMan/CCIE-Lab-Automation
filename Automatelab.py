@@ -202,7 +202,7 @@ def get_bgp_asn(device_ip, DeviceName, output_q):
 		newoutput = output.replace("router bgp ", "")
 	else:
 		newoutput = "N/A"
-	output = "ASN for device {}: {}".format(DeviceName, newoutput)
+	output = "| ASN for device {}: {}{}|".format(DeviceName, newoutput, " " * (7 - len(DeviceName)))
 	net_connect.disconnect()
 	output_dict[DeviceName] = output
 	output_q.put(output_dict)
@@ -629,6 +629,7 @@ def main_menu_selection():
 				time_after = time.time()
 				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
 				print("")
+				raw_input("[+] Press enter to return to the main menu\n")
 			elif selection == '5':
 				"""The Linux SCP server used in this script is natively installed. One issue you 
 				may encounter is an issue with one of your switches or routers not having a cipher
@@ -643,6 +644,7 @@ def main_menu_selection():
 			elif selection == '6':
 				print("[+] Getting BGP ASNs for all routers...")
 				time_before = time.time()
+				print("\n" + "=" * 30)
 				output_q = Queue()
 				for DeviceName, value in Devices.items():
 					if value["device_type"] == "router":
@@ -662,9 +664,11 @@ def main_menu_selection():
 					my_dict = output_q.get()
 					for k, val in my_dict.iteritems():
 						print val
+				print(("=" * 30) + "\n")
 				print("[+] Done")
 				time_after = time.time()
 				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
+				raw_input("[+] Press enter to return to the main menu\n")
 			elif selection == '7':
 				exclude = query_yes_no("[?] Would you like to exclude any devices from your config wipe?", default="n")
 				if exclude == False:
