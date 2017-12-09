@@ -449,9 +449,6 @@ def create_some_threads(my_target, **my_args):
 			for some_thread in threading.enumerate():
 				if some_thread != main_thread:
 					some_thread.join()
-			time_after = time.time()
-			print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
-			print("")
 
 def scenario_configuration_install(device_ip, DeviceName):
 	selected_cmd_file = open('{}.txt'.format(DeviceName), 'rb')
