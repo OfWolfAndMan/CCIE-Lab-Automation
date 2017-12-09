@@ -368,7 +368,6 @@ def reinitialize_basehardening():
 	print("\n[+] Progress\n")
 	pbar = tqdm(total=100)
 	driver = get_network_driver('ios')
-	start_time = time.time()
 	for DeviceName in Devices:
 		device_ip = Devices[DeviceName]['mgmt_ip']
 		optional_args = {'global_delay_factor': 3}
@@ -380,9 +379,6 @@ def reinitialize_basehardening():
 		pbar.update(100/len(Devices))
 	pbar.close()
 	print("[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n")
-	end_time = time.time()
-	print("[+] Time to complete task:{}".format(time_keeper(start_time, end_time)))
-	print("")
 def choose_scenario_type():
 	while True:
 		RandS = raw_input('[?] Are these configurations for a switching lab, a routing lab, or both? Choose one of the three options: [sw/rt/both]')
@@ -438,11 +434,15 @@ def scenario_configuration_threading():
 				if x == int(option):
 					initial_config_folder = y
 					final_path = os.chdir(initial_config_folder)
-			time_before = time.time()
 			print("[+] Pushing scenario configurations to all devices.")
+			my_target = "scenario_configuration_install"
+			create_some_threads(my_target)
+		break
+
+def create_some_threads(my_target, **my_args):
 			for DeviceName in Devices:
 				device_ip = Devices[DeviceName]['mgmt_ip']
-				my_thread = threading.Thread(target=scenario_configuration_install, args=(device_ip, DeviceName))
+				my_thread = threading.Thread(target=my_target, args=(device_ip, DeviceName))
 				my_thread.start()
 	    		# Wait for all threads to complete
 			main_thread = threading.currentThread()
@@ -452,7 +452,7 @@ def scenario_configuration_threading():
 			time_after = time.time()
 			print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
 			print("")
-		break
+
 def scenario_configuration_install(device_ip, DeviceName):
 	selected_cmd_file = open('{}.txt'.format(DeviceName), 'rb')
 	command_set = []
@@ -518,11 +518,6 @@ def get_the_facts():
 	print("[+] Done gathering all teh facts! See below.")
 	for key, value in fact_list.iteritems():
 		print(key + ": " + value)
-
-def time_keeper(start,end):
-	hours, rem = divmod(end-start, 3600)
-	minutes, seconds = divmod(rem, 60)
-	print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
 
 
 def main_menu_selection():
@@ -602,6 +597,7 @@ def main_menu_selection():
 				domainname = raw_input("[?] What is your FQDN?\n")
 				create_threads(domainname, localusername, localpassword)
 			elif selection == '2':
+				time_before = time.time()
 				choose_scenario_type()
 				templates_created = query_yes_no("[?] Have the templates already been created?")
 				if templates_created == False:
@@ -612,6 +608,9 @@ def main_menu_selection():
 					pass
 				print("[+] Applying templates...")
 				reinitialize_basehardening()
+				time_after = time.time()
+				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
+				print("")
 			elif selection == '3':
 				device = 'cisco_ios'
 				pbar = tqdm(total=100)
@@ -621,6 +620,7 @@ def main_menu_selection():
 					install_premium_license(device_ip, device, DeviceName)
 				pbar.close()
 			elif selection == '4':
+				time_before = time.time()
 				choose_scenario_type()
 				exclude = query_yes_no("[?] Would you like to exclude any additional devices prior to pushing scenario configs?", default="n")
 				if exclude == False:
@@ -628,6 +628,9 @@ def main_menu_selection():
 				else:
 					exclude_devices()
 				scenario_configuration_threading()
+				time_after = time.time()
+				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
+				print("")
 			elif selection == '5':
 				"""The Linux SCP server used in this script is natively installed. One issue you 
 				may encounter is an issue with one of your switches or routers not having a cipher
