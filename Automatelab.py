@@ -435,7 +435,8 @@ def scenario_configuration_threading():
 					initial_config_folder = y
 					final_path = os.chdir(initial_config_folder)
 			print("[+] Pushing scenario configurations to all devices.")
-			my_target = "scenario_configuration_install"
+			#my_args = {"arg": "placeholder"}
+			my_target = scenario_configuration_install
 			create_some_threads(my_target)
 		break
 
