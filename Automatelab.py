@@ -360,20 +360,19 @@ def reinitialize_basehardening():
 			print("[!] Invalid input. Please try again.\n")
 			continue
 	print("[+] Copying baseline and hardening scripts to devices.\n")
-	print("\n[+] Progress\n")
-	pbar = tqdm(total=100)
 	driver = get_network_driver('ios')
-	for DeviceName in Devices:
-		device_ip = Devices[DeviceName]['mgmt_ip']
-		optional_args = {'global_delay_factor': 3}
-		device = driver(device_ip, username, password, optional_args=optional_args)
-		device.open()
-		device.load_replace_candidate(filename='Baseline&Hardening_Configurations/Builds/{}.cfg'.format(DeviceName))
-		device.commit_config()
-		device.close()
-		pbar.update(100/len(Devices))
-	pbar.close()
-	print("[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n")
+	my_target = basehardening_install
+	my_args = (driver)
+	create_some_threads(my_target, *my_args)
+
+def basehardening_install(device_ip, DeviceName, driver)
+	optional_args = {'global_delay_factor': 3}
+	device = driver(device_ip, username, password, optional_args=optional_args)
+	device.open()
+	device.load_replace_candidate(filename='Baseline&Hardening_Configurations/Builds/{}.cfg'.format(DeviceName))
+	device.commit_config()
+	device.close()
+
 def choose_scenario_type():
 	while True:
 		RandS = raw_input('[?] Are these configurations for a switching lab, a routing lab, or both? Choose one of the three options: [sw/rt/both]')
@@ -577,9 +576,10 @@ def main_menu_selection():
 					print("[+] Done.")
 				else:
 					pass
-				print("[+] Applying templates...")
+				print("[+] Applying configurations...")
 				reinitialize_basehardening()
 				time_after = time.time()
+				print("[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n")
 				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
 				print("")
 			elif selection == '3':
