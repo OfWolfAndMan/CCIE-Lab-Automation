@@ -187,7 +187,7 @@ def ip_reachability_group():
 	print("*" * 30)
 	print("\n[+] Devices remaining:")
 	print("{}".format("*" * 30))
-	for DeviceName in Devices:
+	for DeviceName in sorted(Devices):
 		print("| [+] {} - {}".format(DeviceName,Devices[DeviceName]['mgmt_ip']))
 	print("*" * 30)
 def get_bgp_asn(device_ip, DeviceName, output_q):
@@ -365,7 +365,7 @@ def reinitialize_basehardening():
 	my_args = (driver)
 	create_some_threads(my_target, *my_args)
 
-def basehardening_install(device_ip, DeviceName, driver)
+def basehardening_install(device_ip, DeviceName, driver):
 	optional_args = {'global_delay_factor': 3}
 	device = driver(device_ip, username, password, optional_args=optional_args)
 	device.open()
@@ -435,7 +435,7 @@ def scenario_configuration_threading():
 		break
 
 def create_some_threads(my_target, *my_args, **my_keyword_args):
-	for DeviceName in Devices:
+	for DeviceName in sorted(Devices):
 		device_ip = Devices[DeviceName]['mgmt_ip']
 		my_args = (device_ip, DeviceName,) + my_args
 		#my_keyword_args = {device_ip: Devices[DeviceName]['mgmt_ip'], DeviceName: DeviceName}
@@ -521,16 +521,16 @@ def get_the_facts():
 def main_menu_selection():
 	try:
 		print("""
-			!#********************************************************************!#
-			!#                                                                    !#
-			!#   Welcome to the CCIE Automation script! The purpose of this       !#
-			!#   script is to streamline your CSR1000v/IOSv deployment,           !#
-			!#   as well as the physical switches in your environment. Be sure.   !#
-			!#   to appropriately define your variables in the device-vars.yml.   !#
-			!#   file before proceeding. Please use the example file in this      !#
-			!#   program's local directory.                                       !#
-			!#                                                                    !#
-			!#********************************************************************!#
+			!#***********************************************************************************************!#
+			!#                                                                                               !#
+			!#                   Welcome to the CCIE Automation script! The purpose of this                  !#
+			!#                   script is to streamline your CSR1000v/IOSv deployment,                      !#
+			!#                   as well as the physical switches in your environment. Be sure.              !#
+			!#                   to appropriately define your variables in the device-vars.yml.              !#
+			!#                   file before proceeding. Please use the example file in this                 !#
+			!#                   program's local directory.                                                  !#
+			!#                                                                                               !#
+			!#***********************************************************************************************!#
 		  """)
 		in_place = query_yes_no("[?] Do you already have the yaml file setup properly?")
 		if in_place == True:
