@@ -518,8 +518,8 @@ def main_menu_selection():
 		print("""
 			!#********************************************************************!#
 			!#                                                                    !#
-			!#   Welcome to the CCIE Automation script! The purpose               !#
-			!#   of this script is to streamline your CSR1000v deployment,        !#
+			!#   Welcome to the CCIE Automation script! The purpose of this       !#
+			!#   script is to streamline your CSR1000v/IOSv deployment,           !#
 			!#   as well as the physical switches in your environment. Be sure.   !#
 			!#   to appropriately define your variables in the device-vars.yml.   !#
 			!#   file before proceeding. Please use the example file in this      !#
