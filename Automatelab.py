@@ -569,6 +569,7 @@ def main_menu_selection():
 				my_target = telnet_initial
 				print("[+] Attempting Out-of-Band IP configuration of all devices...")
 				create_some_threads(my_target, *my_args)
+				raw_input("[+] Task completed. Press enter to return to the main menu\n")
 			elif selection == '2':
 				time_before = time.time()
 				choose_scenario_type()
@@ -584,7 +585,7 @@ def main_menu_selection():
 				time_after = time.time()
 				print("[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n")
 				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
-				print("")
+				raw_input("[+] Task completed. Press enter to return to the main menu\n")
 			elif selection == '3':
 				device = 'cisco_ios'
 				pbar = tqdm(total=100)
@@ -605,7 +606,7 @@ def main_menu_selection():
 				time_after = time.time()
 				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
 				print("")
-				raw_input("[+] Press enter to return to the main menu\n")
+				raw_input("[+] Task completed. Press enter to return to the main menu\n")
 			elif selection == '5':
 				"""The Linux SCP server used in this script is natively installed. One issue you 
 				may encounter is an issue with one of your switches or routers not having a cipher
@@ -644,7 +645,7 @@ def main_menu_selection():
 				print("[+] Done")
 				time_after = time.time()
 				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
-				raw_input("[+] Press enter to return to the main menu\n")
+				raw_input("[+] Task completed. Press enter to return to the main menu\n")
 			elif selection == '7':
 				exclude = query_yes_no("[?] Would you like to exclude any devices from your config wipe?", default="n")
 				if exclude == False:
