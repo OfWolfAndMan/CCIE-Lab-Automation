@@ -173,11 +173,14 @@ def ip_reachability_group():
 		my_args = (pingable_devices, unpingable_devices, limbo)
 		my_target = ping_em_all
 		create_some_threads(my_target, *my_args)
-	print("")
-	print("[!] Removing devices...")
-	for rdevice in unpingable_devices:
-		del Devices[rdevice]
-	print("\n[!] Removed from future tasks:")
+	devices_exclude = query_yes_no("[?] Would you like to exclude all unreachable devices?", default="y")
+	if devices_exclude == True:
+		print("[!] Removing devices...")
+		for rdevice in unpingable_devices:
+			del Devices[rdevice]
+		print("\n[!] Removed from future tasks:")
+	else:
+		print("[!] Unreachable devices:")
 	print("*" * 30)
 	for unreach in unpingable_devices:
 		print("| [-] {} - {}".format(unreach, unpingable_devices[unreach]))
