@@ -1,5 +1,5 @@
 '''
-Modified December 4, 2017
+Modified December 9, 2017
 
 Version: 1.9
 
@@ -150,35 +150,35 @@ def default_configurations():
 		except:
 			pass
 
+def ping_em_all(device_ip, DeviceName, pingable_devices, unpingable_devices, limbo):
+	""".rstrip is needed for the ip as .readline adds a \n to
+	the lines' text"""
+	if "Linux" in platform.system():
+		ping_reply = subprocess.Popen(['ping', '-c', '2', '-w', '2', '-q', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
+	#Darwin is Mac OSX
+	elif "Darwin" in platform.system():
+		ping_reply = subprocess.Popen(['ping', '-c', '2', '-t', '2', '-q', '-n', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
+		"""Subprocess for Cygwin still not supported"""
+	else:
+	#Only other would be Windows
+		ping_reply = subprocess.Popen(['ping', '-n', '2', '-w', '2', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
+	if ping_reply == 0:
+		pingable_devices[DeviceName] = device_ip
+	elif ping_reply == 2:
+		unpingable_devices[DeviceName] = device_ip
+	else:
+		unpingable_devices[DeviceName] = device_ip
+
 def ip_reachability_group():
 	print("\n[+] Checking IP reachability. Please wait...")
 	pingable_devices = {}
 	global unpingable_devices
 	unpingable_devices = {}
 	with open(os.devnull, "wb") as limbo:
-		print("\n[+] Progress:\n")
-		pbar = tqdm(total=100)
-		for DeviceName in Devices:
-			device_ip = Devices[DeviceName]['mgmt_ip']
-			""".rstrip is needed for the ip as .readline adds a \n to
-			the lines' text"""
-			if "Linux" in platform.system():
-				ping_reply = subprocess.Popen(['ping', '-c', '2', '-w', '2', '-q', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
-			#Darwin is Mac OSX
-			elif "Darwin" in platform.system():
-				ping_reply = subprocess.Popen(['ping', '-c', '2', '-t', '2', '-q', '-n', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
-				"""Subprocess for Cygwin still not supported"""
-			else:
-			#Only other would be Windows
-				ping_reply = subprocess.Popen(['ping', '-n', '2', '-w', '2', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
-			if ping_reply == 0:
-				pingable_devices[DeviceName] = device_ip
-			elif ping_reply == 2:
-				unpingable_devices[DeviceName] = device_ip
-			else:
-				unpingable_devices[DeviceName] = device_ip
-			pbar.update(100/float(len(Devices)))
-		pbar.close()
+		#print("\n[+] Progress:\n")
+		my_args = (pingable_devices, unpingable_devices, limbo)
+		my_target = ping_em_all
+		create_some_threads(my_target, *my_args)
 	print("")
 	print("[!] Removing devices...")
 	for rdevice in unpingable_devices:
@@ -440,16 +440,22 @@ def scenario_configuration_threading():
 			create_some_threads(my_target)
 		break
 
-def create_some_threads(my_target, **my_args):
-			for DeviceName in Devices:
-				device_ip = Devices[DeviceName]['mgmt_ip']
-				my_thread = threading.Thread(target=my_target, args=(device_ip, DeviceName))
-				my_thread.start()
-	    		# Wait for all threads to complete
-			main_thread = threading.currentThread()
-			for some_thread in threading.enumerate():
-				if some_thread != main_thread:
-					some_thread.join()
+def create_some_threads(my_target, *my_args, **my_keyword_args):
+	for DeviceName in Devices:
+		device_ip = Devices[DeviceName]['mgmt_ip']
+		my_args = (device_ip, DeviceName,) + my_args
+		#my_keyword_args = {device_ip: Devices[DeviceName]['mgmt_ip'], DeviceName: DeviceName}
+		my_thread = threading.Thread(target=my_target, args=my_args, kwargs=my_keyword_args)
+		my_thread.start()
+		# Wait for all threads to complete
+		my_args_list = list(my_args)
+		my_args_list.remove(device_ip)
+		my_args_list.remove(DeviceName)
+		my_args = tuple(my_args_list)
+	main_thread = threading.currentThread()
+	for some_thread in threading.enumerate():
+		if some_thread != main_thread:
+			some_thread.join()
 
 def scenario_configuration_install(device_ip, DeviceName):
 	selected_cmd_file = open('{}.txt'.format(DeviceName), 'rb')
