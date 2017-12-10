@@ -1,5 +1,5 @@
 '''
-Modified December 9, 2017
+Modified December 10, 2017
 
 Version: 1.9
 
@@ -527,11 +527,11 @@ def main_menu_selection():
 			!#                                                                    !#
 			!#********************************************************************!#
 		  """)
-		in_place = query_yes_no("Do you already have the files in place?")
+		in_place = query_yes_no("[?] Do you already have the yaml file setup properly?")
 		if in_place == True:
 			pass
 		else:
-			sys.exit("You need the files before you may proceed! Exiting.")
+			sys.exit("[!] You need to configure your yaml file before proceeding.")
 		main_menu = {}
 		main_menu['1']="Establish basic connectivity to the boxes"
 		main_menu['2']="Convert running configurations to baseline/hardening templates"
