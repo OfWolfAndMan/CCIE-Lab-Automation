@@ -191,18 +191,21 @@ def ip_reachability_group():
 		print("| [+] {} - {}".format(DeviceName,Devices[DeviceName]['mgmt_ip']))
 	print("*" * 30)
 def get_bgp_asn(device_ip, DeviceName, output_q):
-	output_dict = {}
-	device = 'cisco_ios'
-	net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
-	output = net_connect.send_command("show run | inc router bgp\n")
-	if "bgp" in output:
-		newoutput = output.replace("router bgp ", "")
-	else:
-		newoutput = "N/A"
-	output = "| ASN for device {}: {}{}|".format(DeviceName, newoutput, " " * (7 - len(DeviceName)))
-	net_connect.disconnect()
-	output_dict[DeviceName] = output
-	output_q.put(output_dict)
+	try:
+		output_dict = {}
+		device = 'cisco_ios'
+		net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
+		output = net_connect.send_command("show run | inc router bgp\n")
+		if "bgp" in output:
+			newoutput = output.replace("router bgp ", "")
+		else:
+			newoutput = "N/A"
+		output = "| ASN for device {}: {}{}|".format(DeviceName, newoutput, " " * (7 - len(DeviceName)))
+		net_connect.disconnect()
+		output_dict[DeviceName] = output
+		output_q.put(output_dict)
+	except:
+		print("[!] Something went wrong on device {}. Do you have the correct login credentials?".format(DeviceName))
 
 def backup_config():
 	global unsuccessful_connections
