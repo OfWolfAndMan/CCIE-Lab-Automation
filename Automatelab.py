@@ -516,47 +516,16 @@ def get_the_facts():
 def main_menu_selection():
 	try:
 		print("""
-			!#*****************************************************************!#
-			!# Welcome to the CCIE Automation script! The purpose              !#
-			!# of this script is to streamline your CSR1000v deployment,       !#
-			!# as well as the physical switches in your environment. There     !#
-			!# are several files you will need to add to the local directory   !#
-			!# of this file before proceeding. Please be sure to define the    !#
-			!# name EXACTLY as requested.                                      !#
-			!#                                                                 !#
-			!# 1) userlist.txt - Includes your username and password, both     !#
-			!#    local as well as RADIUS user password (This script is        !#
-			!#    written or RADIUS using the FreeRADIUS server only.          !# 
-			!#    TACACS+ not   included.                                      !#  
-			!#                                                                 !#
-			!# Format (Must match exactly):                                    !#
-			!#                                                                 !#
-			!# LINE 1: [localuser]                                             !#
-			!# LINE 2: [localuser password]                                    !#
-			!# LINE 3: [radius user]                                           !#
-			!# LINE 4: [radius user password]                                  !#
-			!# LINE 5: [SCP Server Username]                                   !#
-			!# LINE 6: [SCP Server Password]                                   !#
-			!#                                                                 !#
-			!# 2) netserver.txt - Includes the IP of the server doing backups. !#
-			!#                                                                 !#
-			!# Format:                                                         !#
-			!#                                                                 !#
-			!# LINE 1: [backupserver ip]                                       !#
-			!#                                                                 !#
-			!# 3) device-vars.yml - Used to include host variables as          !#
-			!#    as additional variables for configuration templating         !#
-			!#    functions.                                            	   !#
-			!#                                                                 !#
-			!# Format:                                                         !#
-			!#                                                                 !#
-			!# Devices:                                                        !#
-			!#   [hostname1]:                                                  !#
-			!#     mgmt_ip: [mgmt_ip]                                          !#
-			!#     serial_ip: [serial_ip] (OPTIONAL)                           !#
-			!#     serial_port: [serial_port] (OPTIONAL)                       !#
-			!#                                                                 !#
-			!#*****************************************************************!#
+			!#********************************************************************!#
+			!#                                                                    !#
+			!#   Welcome to the CCIE Automation script! The purpose               !#
+			!#   of this script is to streamline your CSR1000v deployment,        !#
+			!#   as well as the physical switches in your environment. Be sure.   !#
+			!#   to appropriately define your variables in the device-vars.yml.   !#
+			!#   file before proceeding. Please use the example file in this      !#
+			!#   program's local directory.                                       !#
+			!#                                                                    !#
+			!#********************************************************************!#
 		  """)
 		in_place = query_yes_no("Do you already have the files in place?")
 		if in_place == True:
