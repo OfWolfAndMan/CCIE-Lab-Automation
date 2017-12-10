@@ -235,7 +235,6 @@ def backup_config():
 
 def telnet_initial(device_ip, DeviceName, domainname, localusername, localpassword):
 	try:
-		print("[+] Attempting Out-of-Band IP configuration of device {}...".format(DeviceName))
 		serialip = Devices[DeviceName]['serial_ip']
 		port = Devices[DeviceName]['serial_port']
 		#Specify the connection timeout in seconds for blocking operations, like the connection attempt
@@ -291,11 +290,11 @@ def telnet_initial(device_ip, DeviceName, domainname, localusername, localpasswo
 		time.sleep(2)
 		print("[+]Resolving ARP entry for device %s." % DeviceName)
 		connection.write("ping 208.67.222.222\n")
-		time.sleep(3)
+		time.sleep(2)
 		print("[+]In-band interface configuration successful for device %s." % DeviceName)
 		connection.read_very_eager()
 		connection.close()
-		time.sleep(5)
+		time.sleep(4)
 	except:
 		print("[!] Serial over telnet attempt failed for device %s." % DeviceName)
 
@@ -566,6 +565,7 @@ def main_menu_selection():
 				domainname = raw_input("[?] What is your FQDN?\n")
 				my_args = (domainname, localusername, localpassword)
 				my_target = telnet_initial
+				print("[+] Attempting Out-of-Band IP configuration of all devices...")
 				create_some_threads(my_target, *my_args)
 			elif selection == '2':
 				time_before = time.time()
