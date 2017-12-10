@@ -20,9 +20,9 @@ from tqdm import tqdm
 import yaml
 is_py2 = sys.version[0] == '2'
 if is_py2:
-    import Queue as queue
+    from Queue import Queue
 else:
-    import queue as queue
+    from queue import queue
 
 
 def call_variables(stream):
