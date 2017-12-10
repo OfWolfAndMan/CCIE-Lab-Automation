@@ -18,7 +18,11 @@ import netmiko
 from netmiko import ConnectHandler
 from tqdm import tqdm
 import yaml
-from Queue import Queue
+is_py2 = sys.version[0] == '2'
+if is_py2:
+    import Queue as queue
+else:
+    import queue as queue
 
 
 def call_variables(stream):
@@ -617,8 +621,8 @@ def main_menu_selection():
 						device_ip = Devices[DeviceName]['mgmt_ip']
 						my_thread = threading.Thread(target=get_bgp_asn, args=(device_ip, DeviceName, output_q))
 						my_thread.start()
-	    			else:
-	    				pass
+					else:
+						pass
 	    		# Wait for all threads to complete
 				main_thread = threading.currentThread()
 				for some_thread in threading.enumerate():
@@ -629,7 +633,7 @@ def main_menu_selection():
 				while not output_q.empty():
 					my_dict = output_q.get()
 					for k, val in my_dict.iteritems():
-						print val
+						print(val)
 				print(("=" * 30) + "\n")
 				print("[+] Done")
 				time_after = time.time()
@@ -654,7 +658,7 @@ def main_menu_selection():
 		sys.exit()
 
 if __name__ == "__main__":
-	stream = file('device-vars.yml', 'r')
+	stream = open('device-vars.yml', 'r')
 	stream = yaml.load(stream)
 	Devices = stream['Devices']
 	print("[!] Need to check IP reachability and removable any unreachable devices first. Please wait...")
