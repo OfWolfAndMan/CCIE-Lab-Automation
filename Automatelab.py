@@ -122,16 +122,6 @@ def exclude_devices():
 			print("[!] That device has already been excluded.")
 			continue
 
-def create_threads(domainname, localuser, localpass):
-        threads = []
-        for DeviceName in Devices:
-                th = threading.Thread(target = telnet_initial, args = (domainname, localusername, localpassword, DeviceName))
-                th.start()
-                threads.append(th)
-
-                for th in threads:
-                        th.join()
-
 
 def default_configurations():
 	device = 'cisco_ios'
@@ -236,9 +226,8 @@ def backup_config():
 		print("[-] {}".format(xy))
 	print("")
 
-def telnet_initial(domainname, localusername, localpassword, DeviceName):
+def telnet_initial(device_ip, DeviceName, domainname, localusername, localpassword):
 	try:
-		device_ip = Devices[DeviceName]['mgmt_ip']
 		print("[+] Attempting Out-of-Band IP configuration of device {}...".format(DeviceName))
 		serialip = Devices[DeviceName]['serial_ip']
 		port = Devices[DeviceName]['serial_port']
@@ -599,7 +588,9 @@ def main_menu_selection():
 			selection=raw_input("[*] Please select the option you'd like to run:\n")
 			if selection == '1':
 				domainname = raw_input("[?] What is your FQDN?\n")
-				create_threads(domainname, localusername, localpassword)
+				my_args = (domainname, localusername, localpassword)
+				my_target = telnet_initial
+				create_some_threads(my_target, *my_args)
 			elif selection == '2':
 				time_before = time.time()
 				choose_scenario_type()
