@@ -200,7 +200,7 @@ def get_bgp_asn(device_ip, DeviceName, output_q):
 			newoutput = output.replace("router bgp ", "")
 		else:
 			newoutput = "N/A"
-		output = "| ASN for device {}: {}{}|".format(DeviceName, newoutput, " " * (7 - len(DeviceName)))
+		output = "| ASN for device {}: {}{}{}".format(DeviceName, newoutput, " " * (7 - len(DeviceName)), (" " * (5 - len(newoutput))) + "|")
 		net_connect.disconnect()
 		output_dict[DeviceName] = output
 		output_q.put(output_dict)
@@ -493,6 +493,7 @@ def render_templates():
 		else:
 			pass
 def get_the_facts():
+	from napalm import get_network_driver
 	while True:
 		localorradius = raw_input("[?] Are you currently using RADIUS or local credentials? [local/radius]\n")
 		if localorradius == 'local':
@@ -510,15 +511,17 @@ def get_the_facts():
 	fact_list = {}
 	for DeviceName in Devices:
 		device_ip = Devices[DeviceName]['mgmt_ip']
-		optional_args = {'global_delay_factor': 3}
-		device = driver(device_ip, username, password, optional_args=optional_args)
+		#optional_args = {'global_delay_factor': 3}
+		device = driver(device_ip, username, password)
 		device.open()
 		facts = device.get_facts()
 		device.close()
 		fact_list[DeviceName]=facts
 	print("[+] Done gathering all teh facts! See below.")
 	for key, value in fact_list.iteritems():
-		print(key + ": " + value)
+		if key == "os_version" or key == "serial_number" or key == "model":
+			print("{}".format(DeviceName))
+			print("{}- {}".format(key, value))
 
 
 def main_menu_selection():
@@ -595,13 +598,13 @@ def main_menu_selection():
 					install_premium_license(device_ip, device, DeviceName)
 				pbar.close()
 			elif selection == '4':
-				time_before = time.time()
 				choose_scenario_type()
 				exclude = query_yes_no("[?] Would you like to exclude any additional devices prior to pushing scenario configs?", default="n")
 				if exclude == False:
 					pass
 				else:
 					exclude_devices()
+				time_before = time.time()
 				scenario_configuration_threading()
 				time_after = time.time()
 				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
@@ -621,7 +624,7 @@ def main_menu_selection():
 			elif selection == '6':
 				print("[+] Getting BGP ASNs for all routers...")
 				time_before = time.time()
-				print("\n" + "=" * 30)
+				print("\n" + "=" * 32)
 				output_q = Queue()
 				for DeviceName, value in Devices.items():
 					if value["device_type"] == "router":
@@ -641,7 +644,7 @@ def main_menu_selection():
 					my_dict = output_q.get()
 					for k, val in my_dict.iteritems():
 						print(val)
-				print(("=" * 30) + "\n")
+				print(("=" * 32) + "\n")
 				print("[+] Done")
 				time_after = time.time()
 				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
@@ -654,7 +657,11 @@ def main_menu_selection():
 					exclude_devices()
 				default_configurations()
 			elif selection == '8':
+				time_before = time.time()
 				get_the_facts()
+				time_after = time.time()
+				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
+				raw_input("[+] Task completed. Press enter to return to the main menu\n")
 			elif selection == '9':
 				print("Bye")
 				break
