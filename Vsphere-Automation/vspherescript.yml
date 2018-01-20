@@ -1,0 +1,40 @@
+---
+
+- hosts: vsphere
+  gather_facts: false
+  connection: local
+    
+  tasks:
+
+    - name: Check for vSphere access parameters
+      fail: msg="Must set vsphere_login and vsphere_password in a Vault"
+      when: (vsphere_login is not defined) or (vsphere_password is not defined)
+
+    - name: debug vCenter hostname
+      debug: msg="vcenter_hostname = '{{ vcenter_hostname }}'"
+
+    - name: power off vm
+      vsphere_guest: 
+        vcenter_hostname: "{{ vcenter_hostname }}"
+        username: "{{ vsphere_login }}"
+        password: "{{ vsphere_password }}"
+        guest: "{{ item }}"
+        state: powered_off
+        force: yes   
+        validate_certs: no 
+      with_items: "{{ routers }}"
+
+
+    - name: wait for power off to finish
+      pause: seconds="{{ powerOnTimeout }}"
+
+    - name: power on vm
+      vsphere_guest: 
+        vcenter_hostname: "{{ vcenter_hostname }}"
+        username: "{{ vsphere_login }}"
+        password: "{{ vsphere_password }}"
+        guest: "{{ item }}"
+        state: powered_on
+        force: yes
+        validate_certs: no      
+      with_items: "{{ routers }}"

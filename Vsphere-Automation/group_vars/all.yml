@@ -1,0 +1,17 @@
+---
+
+vsphere_login: root
+vsphere_password: $x%)$$6M"pT[r/8ZYMK)
+powerOnTimeout: 3
+vcenter_hostname: esxi1
+routers:
+  - IOSV1 
+  - IOSv2
+  - IOSv3
+  - IOSv4
+  - IOSv5
+  - IOSv6
+  - IOSv7
+  - IOSv8
+  - IOSv9
+  - IOSV10   

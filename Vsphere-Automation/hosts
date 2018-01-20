@@ -1,0 +1,15 @@
+#NOTE: Putting SSH password inline with vars here [group:vars] requires sshpass to be installed.
+#===============================================================================================
+#INSTALLING ON LINUX (DEBIAN):
+#	apt-get install sshpass -y
+#===============================================================================================
+#INSTALLING ON OS X (Must have Homebrew installed!):
+#	brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb
+#===============================================================================================
+
+[all:vars]
+ansible_python_interpreter="/usr/bin/env python2"
+
+[vsphere]
+esxi1
+
