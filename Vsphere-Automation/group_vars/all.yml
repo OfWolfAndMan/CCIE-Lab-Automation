@@ -1,7 +1,7 @@
 ---
 
 vsphere_login: root
-vsphere_password: $x%)$$6M"pT[r/8ZYMK)
+vsphere_password: bob-saget!
 powerOnTimeout: 3
 vcenter_hostname: esxi1
 routers:
