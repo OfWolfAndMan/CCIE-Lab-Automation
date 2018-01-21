@@ -348,7 +348,6 @@ def telnet_attempt(DeviceName):
 		unsuccessful_connections.append(DeviceName)
 
 def reinitialize_basehardening():
-	from napalm import get_network_driver
 	while True:
 		localorradius = raw_input("[?] Are you currently using RADIUS or local credentials? [local/radius]\n")
 		if localorradius == 'local':
@@ -363,13 +362,15 @@ def reinitialize_basehardening():
 			print("[!] Invalid input. Please try again.\n")
 			continue
 	print("[+] Copying baseline and hardening scripts to devices.\n")
-	driver = get_network_driver('ios')
+	driver = "ios"
 	my_target = basehardening_install
-	my_args = (driver)
+	my_args = [driver, username, password]
 	create_some_threads(my_target, *my_args)
 
-def basehardening_install(device_ip, DeviceName, driver):
+def basehardening_install(device_ip, DeviceName, driver, username, password):
+	from napalm import get_network_driver
 	optional_args = {'global_delay_factor': 3}
+	driver = get_network_driver(driver)
 	device = driver(device_ip, username, password, optional_args=optional_args)
 	device.open()
 	device.load_replace_candidate(filename='Baseline&Hardening_Configurations/Builds/{}.cfg'.format(DeviceName))
