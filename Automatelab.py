@@ -1,7 +1,7 @@
 '''
-Modified January 21, 2018
+Modified January 22, 2018
 
-Version: 2.0
+Version: 2.1
 
 @author: OfWolfAndMan
 '''
@@ -524,6 +524,11 @@ def get_the_facts():
 			print("{}".format(DeviceName))
 			print("{}- {}".format(key, value))
 
+def restart_boxes():
+	#Note: Install pysphere before running via pip
+	print("[+] Restarting VMs through the Vsphere interface...\n")
+	subprocess.call(["ansible-playbook", "-i", "Vsphere-Automation/hosts", "Vsphere-Automation/vspherescript.yml"])
+
 
 def main_menu_selection():
 	try:
@@ -553,7 +558,8 @@ def main_menu_selection():
 		main_menu['6']="Get BGP ASNs for all routers"
 		main_menu['7']="Wipe device configurations and start from scratch"
 		main_menu['8']="Get device facts"
-		main_menu['9']="Exit"
+		main_menu['9']="Restart all routers (Resets the VM, NOT a reload command)"
+		main_menu['10']="Exit"
 		while True:
 			options=main_menu.keys()
 			options.sort(key=int)
@@ -664,6 +670,8 @@ def main_menu_selection():
 				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
 				raw_input("[+] Task completed. Press enter to return to the main menu\n")
 			elif selection == '9':
+				restart_boxes()
+			elif selection == '10':
 				print("Bye")
 				break
 			else:

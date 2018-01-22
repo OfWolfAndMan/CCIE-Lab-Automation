@@ -1,5 +1,5 @@
 # CCIE-Lab-Automation
-## Version 2.0
+## Version 2.1
 
 Use this script to automate a CSR1000V/IOSv deployment, primarily within a CCIE lab environment.
 
@@ -39,7 +39,7 @@ Built in python 2.7. The following are a few features currently available with t
 
 **New in this release:**
 
-- Added Ansible script to automate rebooting VMs in bulk rather than going through the Web UI or Vsphere client
+- Integrated VM restart Ansible playbook as a task into the main python script
 
 **(Potential) Future Development:**
 
