@@ -477,7 +477,7 @@ def create_some_threads(my_target, *my_args, **my_keyword_args):
 			some_thread.join()
 
 def scenario_configuration_install(device_ip, DeviceName):
-	selected_cmd_file = open('{}.txt'.format(DeviceName), 'rb')
+	selected_cmd_file = open('{}.txt'.format(DeviceName), 'r')
 	command_set = []
 	selected_cmd_file.seek(0)
 	device = 'cisco_ios'
