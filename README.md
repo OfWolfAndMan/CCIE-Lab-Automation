@@ -80,3 +80,5 @@ Paths should be defined in the script to suit your needs. Things that will need 
 - Path to your scenario/baseline/hardening configurations on the box running the script
 
 - Variables for the Jinja2 templates
+
+Since release 2.2, Python 2 functionality has been partially broken. Working on patching things up, but moving forward, python3 compatibility is a must.
