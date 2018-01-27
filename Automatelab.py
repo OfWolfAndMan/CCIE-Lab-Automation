@@ -1,7 +1,7 @@
 '''
-Modified January 22, 2018
+Modified January 27, 2018
 
-Version: 2.1
+Version: 2.2
 
 @author: OfWolfAndMan
 '''
@@ -14,7 +14,7 @@ import time
 import subprocess
 import threading
 from getpass import getpass
-import netmiko
+#import netmiko
 from netmiko import ConnectHandler
 from tqdm import tqdm
 import yaml
@@ -22,7 +22,7 @@ is_py2 = sys.version[0] == '2'
 if is_py2:
     from Queue import Queue
 else:
-    from queue import queue
+    from queue import Queue
 
 
 def call_variables(stream):
@@ -46,7 +46,7 @@ may be written for other vendors' equipment."""
 option. If the option is not specified otherwise, it resorts
 to the default of "yes"."""
 def query_yes_no(question, default="y"):
-	"""Ask a yes/no question via raw_input() and return their answer.
+	"""Ask a yes/no question via input() and return their answer.
 
 	"question" is a string that is presented to the user.
 	"default" is the presumed answer if the user just hits <Enter>.
@@ -67,7 +67,7 @@ def query_yes_no(question, default="y"):
 		raise ValueError("invalid default answer: '%s'" % default)
 	while True:
 		sys.stdout.write("{}{}".format(question, prompt))
-		choice = raw_input().lower()
+		choice = input().lower()
 		if default is not None and choice == '':
 			return valid[default]
 		elif choice in valid:
@@ -113,7 +113,7 @@ def exclude_devices():
 	print("[+] To finish your selections, type in 'done' when you are complete.")
 	while True:
 		try:
-			exclude_device = raw_input()
+			exclude_device = input()
 			if exclude_device == "done":
 				break
 			elif exclude_device not in DeviceNames:
@@ -147,15 +147,35 @@ def default_configurations():
 def ping_em_all(device_ip, DeviceName, pingable_devices, unpingable_devices, limbo):
 	""".rstrip is needed for the ip as .readline adds a \n to
 	the lines' text"""
-	if "Linux" in platform.system():
-		ping_reply = subprocess.Popen(['ping', '-c', '2', '-w', '2', '-q', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
-	#Darwin is Mac OSX
-	elif "Darwin" in platform.system():
-		ping_reply = subprocess.Popen(['ping', '-c', '2', '-t', '2', '-q', '-n', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
-		"""Subprocess for Cygwin still not supported"""
+	is_py2 = sys.version[0] == '2'
+	if is_py2:
+		if "Linux" in platform.system():
+			ping_reply = subprocess.Popen(['ping', '-c', '2', '-w', '2', '-q', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
+			#Darwin is Mac OSX
+		elif "Darwin" in platform.system():
+			ping_reply = subprocess.Popen(['ping', '-c', '2', '-t', '2', '-q', '-n', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
+			"""Subprocess for Cygwin still not supported"""
+		else:
+			#Only other would be Windows
+			ping_reply = subprocess.Popen(['ping', '-n', '2', '-w', '2', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
+		
 	else:
-	#Only other would be Windows
-		ping_reply = subprocess.Popen(['ping', '-n', '2', '-w', '2', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
+		import socket
+
+		s = socket.socket()
+		s.settimeout(1)
+
+		try:
+			s.connect((device_ip.rstrip('\n'), 22))
+			ping_reply = 0
+
+		except ConnectionRefusedError:
+			ping_reply = 2
+
+		except socket.timeout:
+			ping_reply = 1
+
+
 	if ping_reply == 0:
 		pingable_devices[DeviceName] = device_ip
 	elif ping_reply == 2:
@@ -349,7 +369,7 @@ def telnet_attempt(DeviceName):
 
 def reinitialize_basehardening():
 	while True:
-		localorradius = raw_input("[?] Are you currently using RADIUS or local credentials? [local/radius]\n")
+		localorradius = input("[?] Are you currently using RADIUS or local credentials? [local/radius]\n")
 		if localorradius == 'local':
 			username = localusername
 			password = localpassword
@@ -379,7 +399,7 @@ def basehardening_install(device_ip, DeviceName, driver, username, password):
 
 def choose_scenario_type():
 	while True:
-		RandS = raw_input('[?] Are these configurations for a switching lab, a routing lab, or both? Choose one of the three options: [sw/rt/both]')
+		RandS = input('[?] Are these configurations for a switching lab, a routing lab, or both? Choose one of the three options: [sw/rt/both]')
 		if RandS == 'rt':
 			Switching_Devices = []
 			for DeviceName in Devices:
@@ -421,9 +441,10 @@ def scenario_configuration_threading():
 		#dir_output[ij] = dir
 	#Using the below, I was able to print the options in three columns
 	for a,b,c in zip(dir_output[::3],dir_output[1::3],dir_output[2::3]):
-		print("{:<47}{:<55}{:25}".format(a,b,c))
+		print("{}{}{}{}{}".format(a," " * (53 - len(str(a))),b," " * (50 - len(str(b))),c))
+		#{:<47}{:<55}{:25}
 	while True:
-		option = raw_input("[+] Choose an option by integer.\n")
+		option = input("[+] Choose an option by integer.\n")
 		if int(option) > len(dir_output):
 			print("[!] You chose an incorrect value. Try again.\n")
 			continue
@@ -496,7 +517,7 @@ def render_templates():
 def get_the_facts():
 	from napalm import get_network_driver
 	while True:
-		localorradius = raw_input("[?] Are you currently using RADIUS or local credentials? [local/radius]\n")
+		localorradius = input("[?] Are you currently using RADIUS or local credentials? [local/radius]\n")
 		if localorradius == 'local':
 			username = localusername
 			password = localpassword
@@ -519,7 +540,7 @@ def get_the_facts():
 		device.close()
 		fact_list[DeviceName]=facts
 	print("[+] Done gathering all teh facts! See below.")
-	for key, value in fact_list.iteritems():
+	for key, value in fact_list.items():
 		if key == "os_version" or key == "serial_number" or key == "model":
 			print("{}".format(DeviceName))
 			print("{}- {}".format(key, value))
@@ -562,7 +583,7 @@ def main_menu_selection():
 		main_menu['10']="Exit"
 		while True:
 			options=main_menu.keys()
-			options.sort(key=int)
+			sorted(options, key=int)
 			print("!#{}!#".format("*" * 95))
 			print("!#{}!#".format(" " * 95))
 			menu_num = 1
@@ -572,14 +593,14 @@ def main_menu_selection():
 			print("!#{}!#".format(" " * 95))
 			print("!#{}!#".format("*" * 95))
 			print("")
-			selection=raw_input("[*] Please select the option you'd like to run:\n")
+			selection=input("[*] Please select the option you'd like to run:\n")
 			if selection == '1':
-				domainname = raw_input("[?] What is your FQDN?\n")
+				domainname = input("[?] What is your FQDN?\n")
 				my_args = (domainname, localusername, localpassword)
 				my_target = telnet_initial
 				print("[+] Attempting Out-of-Band IP configuration of all devices...")
 				create_some_threads(my_target, *my_args)
-				raw_input("[+] Task completed. Press enter to return to the main menu\n")
+				input("[+] Task completed. Press enter to return to the main menu\n")
 			elif selection == '2':
 				time_before = time.time()
 				choose_scenario_type()
@@ -595,7 +616,7 @@ def main_menu_selection():
 				time_after = time.time()
 				print("[+] All configurations have been converted to the bare baseline/hardening templates successfully.\n")
 				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
-				raw_input("[+] Task completed. Press enter to return to the main menu\n")
+				input("[+] Task completed. Press enter to return to the main menu\n")
 			elif selection == '3':
 				device = 'cisco_ios'
 				pbar = tqdm(total=100)
@@ -616,7 +637,7 @@ def main_menu_selection():
 				time_after = time.time()
 				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
 				print("")
-				raw_input("[+] Task completed. Press enter to return to the main menu\n")
+				input("[+] Task completed. Press enter to return to the main menu\n")
 			elif selection == '5':
 				"""The Linux SCP server used in this script is natively installed. One issue you 
 				may encounter is an issue with one of your switches or routers not having a cipher
@@ -649,13 +670,13 @@ def main_menu_selection():
     			# Retrieve everything off the queue
 				while not output_q.empty():
 					my_dict = output_q.get()
-					for k, val in my_dict.iteritems():
+					for k, val in my_dict.items():
 						print(val)
 				print(("=" * 32) + "\n")
 				print("[+] Done")
 				time_after = time.time()
 				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
-				raw_input("[+] Task completed. Press enter to return to the main menu\n")
+				input("[+] Task completed. Press enter to return to the main menu\n")
 			elif selection == '7':
 				exclude = query_yes_no("[?] Would you like to exclude any devices from your config wipe?", default="n")
 				if exclude == False:
@@ -668,7 +689,7 @@ def main_menu_selection():
 				get_the_facts()
 				time_after = time.time()
 				print("[+] Total time to completion: {} seconds".format(round(time_after - time_before, 2)))
-				raw_input("[+] Task completed. Press enter to return to the main menu\n")
+				input("[+] Task completed. Press enter to return to the main menu\n")
 			elif selection == '9':
 				restart_boxes()
 			elif selection == '10':
