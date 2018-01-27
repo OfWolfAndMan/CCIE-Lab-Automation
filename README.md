@@ -39,7 +39,11 @@ Built in python 2.7. The following are a few features currently available with t
 
 **New in this release:**
 
-- Integrated VM restart Ansible playbook as a task into the main python script
+- Updated syntax matching for Python3
+
+- Fixed the Queue method call specific to the queue library (Python 3)
+
+- Changed connectivity verification from ICMP ping to SSH reachability for Python 3 users (Timeout set to 1 for devices not reachable)
 
 **(Potential) Future Development:**
 
