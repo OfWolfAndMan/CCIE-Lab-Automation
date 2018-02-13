@@ -1,3 +1,5 @@
+###RUN PRIOR TO THE REQUIREMENTS FILE!###
+
 #Install the following libraries
 sudo apt-get install build-essential libssl-dev libffi-dev python-dev
 
