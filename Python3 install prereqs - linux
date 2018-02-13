@@ -1,0 +1,9 @@
+#Install the following libraries
+sudo apt-get install build-essential libssl-dev libffi-dev python-dev
+
+#Install the following python libraries
+pip3 install Crypto pycrypto ezsetup
+
+#Update the setuptools python library
+pip install --upgrade setuptools
+
