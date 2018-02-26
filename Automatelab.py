@@ -434,16 +434,16 @@ def scenario_configuration_threading():
 	lab_set = {1: 'advanced.technology.labs', 2: 'advanced.foundation.labs', 3: 'advanced.troubleshooting.labs',
 	           4: 'full-scale.labs', 5: 'mock.labs', 6: 'Narbik_CCIERS_configurationfiles'}
 	for key, value in lab_set.items():
-		print(str(key) + ': ' + value)
+		print('- ' + str(key) + ': ' + value)
 	while True:
-		option = input("[+] Choose which set of lab configs you'd like to use.\n")
+		option = input("\n[+] Choose which set of lab configs you'd like to use.\n")
 		if int(option) > len(lab_set):
 			print("[!] You chose an incorrect value. Try again.\n")
 			continue
 		if int(option) == 6:
 			print("[!] These configurations are not available yet! Will be available soon!")
 		else:
-			path = '/root/scripts/CCIE_Automation/Scenario_Configurations/ine.ccie.rsv5.workbook.initial.configs/{}'.format(lab_set[option])
+			path = '/root/scripts/CCIE_Automation/Scenario_Configurations/ine.ccie.rsv5.workbook.initial.configs/{}'.format(lab_set[int(option)])
 		break
 	os.chdir(path)
 	print("[+] Which Baseline Configs would you like to implement?\n")
