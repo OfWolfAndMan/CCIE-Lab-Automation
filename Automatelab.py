@@ -403,7 +403,7 @@ def choose_scenario_type():
 		if RandS == 'rt':
 			Switching_Devices = []
 			for DeviceName in Devices:
-				if 'IOSV' not in DeviceName:
+				if 'IOSV' not in DeviceName or 'R' not in DeviceName:
 					Switching_Devices.append(DeviceName)
 				else:
 					pass
@@ -431,7 +431,20 @@ def scenario_configuration_threading():
 #Purpose: Deploys a scenario configuration for a lab workbook. Currently, only INE's lab workbook is applicable,
 #but this may change in the future.
 	#sys.setdefaultencoding('utf-8')
-	path = '/root/scripts/CCIE_Automation/Scenario_Configurations/ine.ccie.rsv5.workbook.initial.configs/advanced.technology.labs'
+	lab_set = {1: 'advanced.technology.labs', 2: 'advanced.foundation.labs', 3: 'advanced.troubleshooting.labs',
+	           4: 'full-scale.labs', 5: 'mock.labs', 6: 'Narbik_CCIERS_configurationfiles'}
+	for key, value in lab_set.items():
+		print(str(key) + ': ' + value)
+	while True:
+		option = input("[+] Choose which set of lab configs you'd like to use.\n")
+		if int(option) > len(lab_set):
+			print("[!] You chose an incorrect value. Try again.\n")
+			continue
+		if int(option) == 6:
+			print("[!] These configurations are not available yet! Will be available soon!")
+		else:
+			path = '/root/scripts/CCIE_Automation/Scenario_Configurations/ine.ccie.rsv5.workbook.initial.configs/{}'.format(lab_set[option])
+		break
 	os.chdir(path)
 	print("[+] Which Baseline Configs would you like to implement?\n")
 	dir_output = []
@@ -507,7 +520,7 @@ def render_templates():
 	    Devices = (yaml.load(main_variables_two))['Devices']
 	template = ENV.get_template("Baseline&Hardening_Configurations/Templates/Base&Hardening.template")
 	for DeviceName in Devices:
-		if "IOSV" in DeviceName:
+		if "IOSV" in DeviceName or "R" in DeviceName:
 			with open("Baseline&Hardening_Configurations/Builds/{}.cfg".format(DeviceName), 'w') as config_output:
 				config_template = template.render(main_variables, hostname=DeviceName, mgmt_ip=Devices[DeviceName]['mgmt_ip'], mgmt_mask=Devices[DeviceName]['mgmt_mask'])
 				config_output.write(config_template)

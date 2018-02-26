@@ -1,5 +1,5 @@
 # CCIE-Lab-Automation
-## Version 2.2
+## Version 2.3
 
 Use this script to automate a CSR1000V/IOSv deployment, primarily within a CCIE lab environment.
 
@@ -39,11 +39,7 @@ Built in python 2.7. The following are a few features currently available with t
 
 **New in this release:**
 
-- Updated syntax matching for Python3
-
-- Fixed the Queue method call specific to the queue library (Python 3)
-
-- Changed connectivity verification from ICMP ping to SSH reachability for Python 3 users (Timeout set to 1 for devices not reachable)
+- Supports all sets of lab configurations for INE (Working on Narbik's as well)
 
 **(Potential) Future Development:**
 
