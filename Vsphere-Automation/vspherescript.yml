@@ -23,12 +23,14 @@
         force: yes   
         validate_certs: no 
       with_items: "{{ routers }}"
-
+      tags: 
+        - reboot
+        - shutdown
 
     - name: wait for power off to finish
       pause: seconds="{{ powerOnTimeout }}"
 
-    - name: power on vm
+    - name: power on vm for Cisco routers
       vsphere_guest: 
         vcenter_hostname: "{{ vcenter_hostname }}"
         username: "{{ vsphere_login }}"
@@ -37,4 +39,22 @@
         state: powered_on
         force: yes
         validate_certs: no      
-      with_items: "{{ routers }}"
+      with_items: 
+        - "{{ routers }}"
+      tags:
+        - reboot
+        - initialize
+
+    - name: power on vm for PFSense
+      vsphere_guest:
+        vcenter_hostname: "{{ vcenter_hostname }}"
+        username: "{{ vsphere_login }}"
+        password: "{{ vsphere_password }}"
+        guest: "{{ item }}"
+        state: powered_on
+        force: yes
+        validate_certs: no
+      with_items: 
+        - "{{ pfsense }}"
+      tags: initialize
+
