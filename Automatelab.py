@@ -6,6 +6,31 @@ Version: 2.2
 @author: OfWolfAndMan
 '''
 
+######################################################################
+#  + Additional snippets of code to be added:                  
+#                                        
+# output = net_connect.send_command(
+#     cmd, 
+#     expect_string=r'Destination filename'
+# )
+# try:
+#     output += net_connect.send_command('\n', expect_string=r'#')
+#
+#  + In the above operation, a file is moved.
+#  + Using the expect string allows for multiline handling
+#  + Other implemenations: License configuration or reload
+#
+######################################################################
+#
+# + Raise an error manually if something occurs
+#  
+#  if this_happens:
+#      raise ValueError("Something isn't there. Go back and fix it.")
+#
+# + Implementation: If file not present in directory
+#
+######################################################################
+
 import sys
 import os
 import platform
@@ -14,7 +39,6 @@ import time
 import subprocess
 import threading
 from getpass import getpass
-#import netmiko
 from netmiko import ConnectHandler
 from tqdm import tqdm
 import yaml
