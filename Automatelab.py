@@ -41,6 +41,7 @@ import threading
 from getpass import getpass
 from netmiko import ConnectHandler
 from tqdm import tqdm
+from argparse import ArgumentParser
 import yaml
 is_py2 = sys.version[0] == '2'
 if is_py2:
@@ -742,12 +743,21 @@ if __name__ == "__main__":
 	stream = open('device-vars.yml', 'r')
 	stream = yaml.load(stream)
 	Devices = stream['Devices']
-	print("[!] Need to check IP reachability and removable any unreachable devices first. Please wait...")
-	ip_reachability_group()
-	in_place = query_yes_no("\nDevices that are reachable are listed above. Proceed?")
-	if in_place == True:
+	parser = ArgumentParser(description='Select options.')
+
+    # Input parameters
+	parser.add_argument('-verify', '--verify_bool', type=str, default='Yes', help="The device IP or DN")
+	args = parser.parse_args()
+	verification = args.verify_bool
+	if verification == "Yes" or verification == "Yes":
+		print("[!] Need to check IP reachability and removable any unreachable devices first. Please wait...")
+		ip_reachability_group()
+		in_place = query_yes_no("\nDevices that are reachable are listed above. Proceed?")
+		if in_place == True:
 			pass
+		else:
+			sys.exit("Exiting!")
 	else:
-		sys.exit("Exiting!")
+		pass
 	call_variables(stream)
 	main_menu_selection()
