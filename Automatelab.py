@@ -749,7 +749,7 @@ if __name__ == "__main__":
 	parser.add_argument('-verify', '--verify_bool', type=str, default='Yes', help="The device IP or DN")
 	args = parser.parse_args()
 	verification = args.verify_bool
-	if verification == "Yes" or verification == "Yes":
+	if verification == "Yes":
 		print("[!] Need to check IP reachability and removable any unreachable devices first. Please wait...")
 		ip_reachability_group()
 		in_place = query_yes_no("\nDevices that are reachable are listed above. Proceed?")
@@ -757,7 +757,5 @@ if __name__ == "__main__":
 			pass
 		else:
 			sys.exit("Exiting!")
-	else:
-		pass
 	call_variables(stream)
 	main_menu_selection()
