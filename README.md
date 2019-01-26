@@ -1,5 +1,5 @@
 # CCIE-Lab-Automation
-## Version 2.3
+## Version 2.4
 
 Use this script to automate a CSR1000V/IOSv deployment, primarily within a CCIE lab environment.
 
@@ -39,7 +39,7 @@ Built in python 2.7. The following are a few features currently available with t
 
 **New in this release:**
 
-- Supports all sets of lab configurations for INE (Working on Narbik's as well)
+- Code cleanup
 
 **(Potential) Future Development:**
 

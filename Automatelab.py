@@ -1,7 +1,7 @@
 '''
-Modified January 27, 2018
+Modified January 26, 2019
 
-Version: 2.2
+Version: 2.4
 
 @author: OfWolfAndMan
 '''
@@ -597,9 +597,7 @@ def main_menu_selection():
 			!#***********************************************************************************************!#
 		  """)
 		in_place = query_yes_no("[?] Do you already have the yaml file setup properly?")
-		if in_place == True:
-			pass
-		else:
+		if in_place != True:
 			sys.exit("[!] You need to configure your yaml file before proceeding.")
 		main_menu = {}
 		main_menu['1']="Establish basic connectivity to the boxes"
@@ -657,9 +655,7 @@ def main_menu_selection():
 			elif selection == '4':
 				choose_scenario_type()
 				exclude = query_yes_no("[?] Would you like to exclude any additional devices prior to pushing scenario configs?", default="n")
-				if exclude == False:
-					pass
-				else:
+				if exclude != False:
 					exclude_devices()
 				time_before = time.time()
 				scenario_configuration_threading()
@@ -673,9 +669,7 @@ def main_menu_selection():
 				supported by the SCP server. To change this, you will need to edit your ssh configuration
 				in the /etc/ssh/sshd_config file"""
 				exclude = query_yes_no("[?] Would you like to exclude any devices from your backup?", default="n")
-				if exclude == False:
-					pass
-				else:
+				if exclude != False:
 					exclude_devices()
 				backup_config()
 			elif selection == '6':
@@ -706,9 +700,7 @@ def main_menu_selection():
 				input("[+] Task completed. Press enter to return to the main menu\n")
 			elif selection == '7':
 				exclude = query_yes_no("[?] Would you like to exclude any devices from your config wipe?", default="n")
-				if exclude == False:
-					pass
-				else:
+				if exclude != False:
 					exclude_devices()
 				default_configurations()
 			elif selection == '8':
@@ -742,9 +734,7 @@ if __name__ == "__main__":
 		print("[!] Need to check IP reachability and removable any unreachable devices first. Please wait...")
 		ip_reachability_group()
 		in_place = query_yes_no("\nDevices that are reachable are listed above. Proceed?")
-		if in_place == True:
-			pass
-		else:
+		if in_place != True:
 			sys.exit("Exiting!")
 	call_variables(stream)
 	main_menu_selection()
