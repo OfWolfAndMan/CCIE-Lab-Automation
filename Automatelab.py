@@ -43,6 +43,7 @@ from netmiko import ConnectHandler
 from tqdm import tqdm
 from argparse import ArgumentParser
 import yaml
+import contextlib
 is_py2 = sys.version[0] == '2'
 if is_py2:
     from Queue import Queue
@@ -526,12 +527,10 @@ def scenario_configuration_install(device_ip, DeviceName):
 			command_set.append(each_line)
 		else:
 			command_set.append(each_line)
-	try:
+	with contextlib.suppress(netmiko.ssh_exception.NetMikoTimeoutException):
 		net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
 		output = net_connect.send_config_set(command_set)
 		net_connect.disconnect()
-	except netmiko.ssh_exception.NetMikoTimeoutException:
-		pass
 	print("[+] Scenario configuration of device {} successful.".format(DeviceName))
 	selected_cmd_file.close()
 
