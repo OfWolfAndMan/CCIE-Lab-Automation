@@ -431,8 +431,6 @@ def choose_scenario_type():
 			for DeviceName in Devices:
 				if 'IOSV' not in DeviceName or 'R' not in DeviceName:
 					Switching_Devices.append(DeviceName)
-				else:
-					pass
 
 			for Switch in Switching_Devices:
 				del Devices[Switch]
@@ -442,8 +440,6 @@ def choose_scenario_type():
 			for DeviceName in Devices:
 				if 'SW' not in DeviceName:
 					Routing_Devices.append(DeviceName)
-				else:
-					pass
 
 			for Router in Routing_Devices:
 				del Devices[Router]
@@ -549,8 +545,6 @@ def render_templates():
 				config_template = template.render(main_variables, hostname=DeviceName, mgmt_ip=Devices[DeviceName]['mgmt_ip'], mgmt_mask=Devices[DeviceName]['mgmt_mask'])
 				config_output.write(config_template)
 			config_output.close()
-		else:
-			pass
 def get_the_facts():
 	from napalm import get_network_driver
 	while True:
@@ -646,8 +640,6 @@ def main_menu_selection():
 					print("[!] Rendering templates...")
 					render_templates()
 					print("[+] Done.")
-				else:
-					pass
 				print("[+] Applying configurations...")
 				reinitialize_basehardening()
 				time_after = time.time()
@@ -696,8 +688,6 @@ def main_menu_selection():
 						device_ip = Devices[DeviceName]['mgmt_ip']
 						my_thread = threading.Thread(target=get_bgp_asn, args=(device_ip, DeviceName, output_q))
 						my_thread.start()
-					else:
-						pass
 	    		# Wait for all threads to complete
 				main_thread = threading.currentThread()
 				for some_thread in threading.enumerate():

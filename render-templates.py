@@ -14,5 +14,3 @@ for DeviceName in Devices:
 			config_template = template.render(main_variables, hostname=DeviceName, mgmt_ip=Devices[DeviceName]['mgmt_ip'], mgmt_mask=Devices[DeviceName]['mgmt_mask'])
 			config_output.write(config_template)
 		config_output.close()
-	else:
-		pass
