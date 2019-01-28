@@ -78,3 +78,7 @@ Paths should be defined in the script to suit your needs. Things that will need 
 - Variables for the Jinja2 templates
 
 Since release 2.2, Python 2 functionality has been partially broken. Working on patching things up, but moving forward, python3 compatibility is a must.
+
+**To-Do:**
+
+- Guidance on script usage must be added. Lots of parameters not mentioned

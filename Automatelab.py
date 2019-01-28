@@ -53,6 +53,7 @@ else:
 
 def call_variables(stream):
 	path = '/root/scripts/CCIE_Automation/'
+	"""The path needs to be more intuitive"""
 	os.chdir(path)
 
 	global localusername, localpassword, radiususer, radiuspass, scpuser, scppass, scpip
@@ -90,7 +91,7 @@ def query_yes_no(question, default="y"):
 	elif default == "n":
 		prompt = " [y/N] "
 	else:
-		raise ValueError("invalid default answer: '%s'" % default)
+		raise ValueError("Invalid default answer: '%s'" % default)
 	while True:
 		sys.stdout.write("{}{}".format(question, prompt))
 		choice = input().lower()
@@ -102,6 +103,8 @@ def query_yes_no(question, default="y"):
 			sys.stdout.write("Please respond with 'y' or 'n' \n")
 
 def install_premium_license(device_ip, device, DeviceName):
+	"""Need to find a way to globally apply some form of concurrency to the 
+       net_connect instances"""
 	print("""
 			!#***************************************************************!#
 			!# It is advised to take a snapshot after installing the premium !#
@@ -122,6 +125,7 @@ def install_premium_license(device_ip, device, DeviceName):
 	pbar.update(100/float(len(Devices)))
 
 def backup_config_single(device_ip, device, DeviceName):
+	"""Needs to be merged with backup_config"""
 	try:
 		net_connect = ConnectHandler(device_type = device, ip = device_ip, username = localusername, password = localpassword)
 		output = net_connect.send_command('copy running-config scp://root@192.168.15.188/Documents/backups/{}.txt\n\n\n\n{}\n'.format(DeviceName, scppass))
@@ -184,7 +188,6 @@ def ping_em_all(device_ip, DeviceName, pingable_devices, unpingable_devices, lim
 		else:
 			#Only other would be Windows
 			ping_reply = subprocess.Popen(['ping', '-n', '2', '-w', '2', device_ip.rstrip('\n')],stdout=limbo, stderr=limbo).wait()
-		
 	else:
 		import socket
 
@@ -220,7 +223,7 @@ def ip_reachability_group():
 		my_target = ping_em_all
 		create_some_threads(my_target, *my_args)
 	devices_exclude = query_yes_no("[?] Would you like to exclude all unreachable devices?", default="y")
-	if devices_exclude == True:
+	if devices_exclude:
 		print("[!] Removing devices...")
 		for rdevice in unpingable_devices:
 			del Devices[rdevice]
@@ -597,7 +600,7 @@ def main_menu_selection():
 			!#***********************************************************************************************!#
 		  """)
 		in_place = query_yes_no("[?] Do you already have the yaml file setup properly?")
-		if in_place != True:
+		if not in_place:
 			sys.exit("[!] You need to configure your yaml file before proceeding.")
 		main_menu = {}
 		main_menu['1']="Establish basic connectivity to the boxes"
@@ -717,7 +720,7 @@ def main_menu_selection():
 			else:
 				print("[!] Invalid option. Please try again.\n")
 	except KeyboardInterrupt:
-		print("\n[!] Keyboard Interrupt detected. Goodbye!")
+		raise KeyboardInterrupt("\n[!] Keyboard Interrupt detected. Goodbye!")
 		sys.exit()
 
 if __name__ == "__main__":
@@ -734,7 +737,7 @@ if __name__ == "__main__":
 		print("[!] Need to check IP reachability and removable any unreachable devices first. Please wait...")
 		ip_reachability_group()
 		in_place = query_yes_no("\nDevices that are reachable are listed above. Proceed?")
-		if in_place != True:
+		if not in_place:
 			sys.exit("Exiting!")
 	call_variables(stream)
 	main_menu_selection()
