@@ -102,6 +102,11 @@ def query_yes_no(question, default="y"):
 		else:
 			sys.stdout.write("Please respond with 'y' or 'n' \n")
 
+def ssh_connection(device, device_ip, username, password, my_command):
+		net_connect = ConnectHandler(device_type = device, ip = device_ip, username = username, password = password)
+		output = net_connect.send_command(my_command)
+		net_connect.disconnect()
+
 def install_premium_license(device_ip, device, DeviceName):
 	"""Need to find a way to globally apply some form of concurrency to the 
        net_connect instances"""
@@ -114,9 +119,8 @@ def install_premium_license(device_ip, device, DeviceName):
 			!#***************************************************************!#
 		  """)
 	try:
-		net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
-		output = net_connect.send_command("\nconfigure terminal\nlicense boot level premium\nyes\nend\nwrite\nreload\n")
-		net_connect.disconnect()
+		my_command = "\nconfigure terminal\nlicense boot level premium\nyes\nend\nwrite\nreload\n"
+		ssh_connection(device, device_ip, radiususer, radiuspass, my_command)
 	except netmiko.ssh_exception.NetMikoTimeoutException:
 		print("[!] Could not connect to device {}. Skipping...".format(DeviceName))
 		pass
@@ -127,9 +131,8 @@ def install_premium_license(device_ip, device, DeviceName):
 def backup_config_single(device_ip, device, DeviceName):
 	"""Needs to be merged with backup_config"""
 	try:
-		net_connect = ConnectHandler(device_type = device, ip = device_ip, username = localusername, password = localpassword)
-		output = net_connect.send_command('copy running-config scp://root@192.168.15.188/Documents/backups/{}.txt\n\n\n\n{}\n'.format(DeviceName, scppass))
-		net_connect.disconnect()
+		my_command = "copy running-config scp://root@192.168.15.188/Documents/backups/{}.txt\n\n\n\n{}\n".format(DeviceName, scppass)
+		ssh_connection(device, device_ip, localusername, localpassword, my_command)
 		successful_connections.append(DeviceName)
 	except:
 		unsuccessful_connections.append(DeviceName)
@@ -163,9 +166,8 @@ def default_configurations():
 	for DeviceName in Devices:
 		device_ip = Devices[DeviceName]['mgmt_ip']
 		try:
-			net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
-			output = net_connect.send_command_expect("\nend\nwrite memory\nwrite erase\n\nreload\n\n")
-			net_connect.disconnect()
+			my_command = "\nend\nwrite memory\nwrite erase\n\nreload\n\n"
+			ssh_connection(device, device_ip, radiususer, radiuspass, my_command)
 			print("[+] Configuration wiped successfully for device {}".format(DeviceName))
 			time.sleep(5)
 		except netmiko.ssh_exception.NetMikoTimeoutException:
@@ -243,6 +245,7 @@ def get_bgp_asn(device_ip, DeviceName, output_q):
 	try:
 		output_dict = {}
 		device = 'cisco_ios'
+		my_command = "show run | inc router bgp\n"
 		net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
 		output = net_connect.send_command("show run | inc router bgp\n")
 		if "bgp" in output:
@@ -267,9 +270,8 @@ def backup_config():
 		device_ip = Devices[DeviceName]['mgmt_ip']
 		device = 'cisco_ios'
 		try:
-			net_connect = ConnectHandler(device_type = device, ip = device_ip, username = radiususer, password = radiuspass)
-			output = net_connect.send_command('copy running-config scp://root@{}/Documents/backups/{}.txt\n\n\n\n{}\n'.format(scpip, DeviceName, scppass))
-			net_connect.disconnect()
+			my_command = "copy running-config scp://root@{}/Documents/backups/{}.txt\n\n\n\n{}\n".format(scpip, DeviceName, scppass)
+			ssh_connection(device, device_ip, radiususer, radiuspass, my_command)
 			successful_connections.append(DeviceName)
 		except:
 			print("[+] Could not SSH to device {}. Trying serial connection...".format(DeviceName))
