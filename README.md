@@ -82,3 +82,5 @@ Since release 2.2, Python 2 functionality has been partially broken. Working on 
 **To-Do:**
 
 - Guidance on script usage must be added. Lots of parameters not mentioned
+
+- The telnet functions can likely be consolidated, (DRY principle)
